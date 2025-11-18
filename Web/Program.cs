@@ -28,10 +28,9 @@ builder.Services.AddExceptionHandler<ExceptionHandler>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment()) {
-  app.UseOpenApi();
-  app.UseSwaggerUi();
-}
+// свагер пусть будет и в продакшене
+app.UseOpenApi();
+app.UseSwaggerUi();
 
 app.UseHttpsRedirection();
 
