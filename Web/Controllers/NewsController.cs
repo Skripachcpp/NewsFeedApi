@@ -13,7 +13,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   [HttpGet("/v1/article/{id}")]
   public async Task<ActionResult<NewsArticleDto>> GetArticle(int id) {
     var result = await newsRepository.GetArticleAsync(id);
-    if (result == null) return NotFound();
+    if (result == null) return NotFound("Статья не найдена");
     return OkResult(result);
   }
   
@@ -60,7 +60,9 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   public async Task<ActionResult> DeleteArticle(
     int id
   ) {
-    await newsRepository.DeleteArticleAsync(id);
+    var success = await newsRepository.DeleteArticleAsync(id);
+    if (success == false) return NotFound("Статья не найдена");
+    
     return Ok();
   }
 }

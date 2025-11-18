@@ -60,6 +60,28 @@ public class DpContext(string connectionString) {
       throw;
     }
   }
+  
+  public async Task<T?> QuerySingleOrDefaultWithTransactionAsync<T>(string sql,
+    CancellationToken cancellationToken = default, object? parameters = default) {
+    using var connection = OpenConnection();
+    var transaction = connection.BeginTransaction();
+
+    try {
+      var result = await connection.QuerySingleOrDefaultAsync<T>(new CommandDefinition(
+        sql,
+        parameters: parameters,
+        transaction: transaction,
+        cancellationToken: cancellationToken
+      ));
+
+      transaction.Commit();
+      return result;
+    }
+    catch {
+      transaction.Rollback();
+      throw;
+    }
+  }
 
   public async Task<IEnumerable<T>> QueryWithTransactionAsync<T>(string sql,
     CancellationToken cancellationToken = default, object? parameters = default) {
@@ -83,18 +105,20 @@ public class DpContext(string connectionString) {
     }
   }
 
-  public async Task ExecuteWithTransactionAsync(string sql, CancellationToken cancellationToken = default, object? parameters = default) {
+  public async Task<int> ExecuteWithTransactionAsync(string sql, CancellationToken cancellationToken = default, object? parameters = default) {
     using var connection = OpenConnection();
     var transaction = connection.BeginTransaction();
 
     try {
-      await connection.ExecuteAsync(new CommandDefinition(
+      var rowsAffected = await connection.ExecuteAsync(new CommandDefinition(
         sql,
         parameters: parameters,
         transaction: transaction,
         cancellationToken: cancellationToken
       ));
       transaction.Commit();
+
+      return rowsAffected;
     }
     catch {
       transaction.Rollback();
