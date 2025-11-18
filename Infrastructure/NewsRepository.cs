@@ -62,6 +62,9 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   public async Task<NewsArticleDto?> GetArticleAsync(int id, CancellationToken cancellationToken = default) {
     using var connection = dpContext.OpenConnection();
     var result = await QueryGetArticleAsync(id, connection, cancellationToken);
+    // TOOD: надо ошибку на аргумент а не 500 кидать
+    if (result == null) throw new InvalidOperationException("Не удалось найти статью"); 
+    
     return result;
   }
 
