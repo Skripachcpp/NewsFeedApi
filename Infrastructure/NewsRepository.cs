@@ -1,7 +1,6 @@
 using System.Data;
 using Dapper;
 using Domain.DTOs;
-using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Data;
 
@@ -66,16 +65,19 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
     return result;
   }
 
-  private async Task<IEnumerable<int>> QueryTagCreateIfNotExistsAsync(
-    IEnumerable<string> tags,
+  private async Task QueryCreateIfNotExistsTagAndAttachToArticleAsync(
+    IEnumerable<string> tagNames,
+    int articleId,
+    
     IDbConnection connection,
     CancellationToken cancellationToken = default,
     IDbTransaction? transaction = default) {
-    var tagList = tags.ToList();
-    if (!tagList.Any()) return [];
+    
+    var tagNamesList = tagNames.ToList();
+    if (!tagNamesList.Any()) return;
 
     // language=PostgreSQL
-    var result = await connection.QueryAsync<int>(new CommandDefinition(
+    var tagIdsList = (await connection.QueryAsync<int>(new CommandDefinition(
       @"
         INSERT INTO tag (name)
         SELECT unnest(@Names)
@@ -84,25 +86,18 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         SELECT id FROM tag
         WHERE name = ANY(@Names)
       ",
-      parameters: new { Names = tagList },
+      parameters: new { Names = tagNamesList },
       transaction: transaction,
-      cancellationToken: cancellationToken));
+      cancellationToken: cancellationToken))).ToList();
 
-    return result;
-  }
 
-  private async Task QueryAttachTagsToArticleAsyncAsync(
-    IEnumerable<int> tagIds,
-    int articleId,
-    IDbConnection connection,
-    CancellationToken cancellationToken = default,
-    IDbTransaction? transaction = default) {
-    var tagIdsList = tagIds.ToList();
     if (!tagIdsList.Any()) return;
 
     // language=PostgreSQL
     await connection.ExecuteAsync(new CommandDefinition(
       @"
+            DELETE FROM news_article_tag WHERE news_article_id = @ArticleId;
+
             INSERT INTO news_article_tag (news_article_id, tag_id)
             SELECT @ArticleId, unnest(@TagIds)
             ON CONFLICT (news_article_id, tag_id) DO NOTHING;           
@@ -113,7 +108,8 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
     ));
   }
 
-  public async Task<NewsArticleDto> CreateArticleAsync(NewsArticleCreateDto article,
+  public async Task<NewsArticleDto> CreateArticleAsync(
+    NewsArticleCreateDto article,
     CancellationToken cancellationToken = default) {
     using var connection = dpContext.OpenConnection();
     using var transaction = connection.BeginTransaction();
@@ -138,23 +134,72 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         cancellationToken: cancellationToken
       ));
 
-      var tagIds = (await QueryTagCreateIfNotExistsAsync(
+      await QueryCreateIfNotExistsTagAndAttachToArticleAsync(
         article.Tags ?? [],
+        articleId,
         connection: connection,
         cancellationToken: cancellationToken,
         transaction: transaction
-      ));
-
-      await QueryAttachTagsToArticleAsyncAsync(
-        tagIds,
-        articleId,
-        connection,
-        transaction: transaction,
-        cancellationToken: cancellationToken
       );
 
       var articleNext = await QueryGetArticleAsync(articleId, connection, cancellationToken, transaction);
       if (articleNext == null) throw new InvalidOperationException("Не удалось загрузить созданную статью");
+
+      transaction.Commit();
+
+      return articleNext;
+    }
+    catch {
+      transaction.Rollback();
+      throw;
+    }
+  }
+  
+  public async Task<NewsArticleDto> UpdateArticleAsync(
+    NewsArticleUpdateDto article,
+    CancellationToken cancellationToken = default) {
+    using var connection = dpContext.OpenConnection();
+    using var transaction = connection.BeginTransaction();
+
+    try {
+      // language=PostgreSQL
+      var articleId = await connection.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
+        @"
+        UPDATE news_article
+        SET title = @Title,
+            content = @Content,
+            summary = @Summary,
+            publication_date = @PublicationDate,
+            user_id = @UserId,
+            user_name = @UserName
+        WHERE id = @Id
+        RETURNING id
+        ",
+        parameters: new {
+          Id = article.Id,
+          Title = article.Title,
+          Content = article.Content,
+          Summary = article.Summary,
+          PublicationDate = article.PublicationDate,
+          UserId = article.UserId,
+          UserName = article.UserName
+        },
+        transaction: transaction,
+        cancellationToken: cancellationToken
+      ));
+      
+      if (articleId == null) throw new InvalidOperationException("Не удалось найти статью по ее идентификатору");
+
+      await QueryCreateIfNotExistsTagAndAttachToArticleAsync(
+        article.Tags ?? [],
+        articleId.Value,
+        connection: connection,
+        cancellationToken: cancellationToken,
+        transaction: transaction
+      );
+
+      var articleNext = await QueryGetArticleAsync(articleId.Value, connection, cancellationToken, transaction);
+      if (articleNext == null) throw new InvalidOperationException("Не удалось найти обновленную статью");
 
       transaction.Commit();
 

@@ -38,10 +38,31 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
     return Ok(result);
   }
   
+  [HttpPatch("/v1/article/{id}")]
+  public async Task<ActionResult<NewsArticleDto>> UpdateArticle(
+    int id, // странно конечно тут выглядит id
+    [FromBody] ArticleCreateRequest article
+  ) {
+    var newsArticleCreateDto = new NewsArticleUpdateDto {
+      Id = id,
+      Title = article.Title,
+      Content = article.Content,
+      Summary = article.Summary,
+      Tags = article.Tags,
+      PublicationDate = DateTime.UtcNow,
+    };
+    
+    var result = await newsRepository.UpdateArticleAsync(newsArticleCreateDto);
+    return Ok(result);
+  }
+  
   [HttpDelete("/v1/article/{id}")]
-  public async Task DeleteArticle(
+  public async Task<ActionResult> DeleteArticle(
     int id
   ) {
     await newsRepository.DeleteArticleAsync(id);
+    return Ok();
   }
+  
+  
 }
