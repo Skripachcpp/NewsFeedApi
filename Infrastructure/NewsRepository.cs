@@ -23,7 +23,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   LEFT JOIN tag t ON nat.tag_id = t.id
   ";
 
-  
+
   private const string BaseSelectQueryEnding = @"
   GROUP BY na.id, na.title, na.content, na.summary, na.publication_date, na.user_name
   ORDER BY na.publication_date DESC
@@ -32,7 +32,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   public async Task<IEnumerable<NewsArticleDto>> GetArticlesAsync(CancellationToken cancellationToken = default) {
     // language=PostgreSQL
     var result = await dpContext.QueryAsync<NewsArticleDto>(
-  $@"
+      $@"
         {BaseSelectQuerySelect}
         {BaseSelectQueryEnding}
       ",
@@ -91,6 +91,28 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
     return result;
   }
 
+  private async Task QueryAttachTagsToArticleAsyncAsync(
+    IEnumerable<int> tagIds,
+    int articleId,
+    IDbConnection connection,
+    CancellationToken cancellationToken = default,
+    IDbTransaction? transaction = default) {
+    var tagIdsList = tagIds.ToList();
+    if (!tagIdsList.Any()) return;
+
+    // language=PostgreSQL
+    await connection.ExecuteAsync(new CommandDefinition(
+      @"
+            INSERT INTO news_article_tag (news_article_id, tag_id)
+            SELECT @ArticleId, unnest(@TagIds)
+            ON CONFLICT (news_article_id, tag_id) DO NOTHING;           
+          ",
+      parameters: new { ArticleId = articleId, TagIds = tagIdsList },
+      cancellationToken: cancellationToken,
+      transaction: transaction
+    ));
+  }
+
   public async Task<NewsArticleDto> CreateArticleAsync(NewsArticleCreateDto article,
     CancellationToken cancellationToken = default) {
     using var connection = dpContext.OpenConnection();
@@ -121,21 +143,15 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         connection: connection,
         cancellationToken: cancellationToken,
         transaction: transaction
-      )).ToList();
+      ));
 
-      if (tagIds.Any()) {
-        // language=PostgreSQL
-        await connection.ExecuteAsync(new CommandDefinition(
-          @"
-            INSERT INTO news_article_tag (news_article_id, tag_id)
-            SELECT @ArticleId, unnest(@TagIds)
-            ON CONFLICT (news_article_id, tag_id) DO NOTHING;           
-          ",
-          parameters: new { ArticleId = articleId, TagIds = tagIds },
-          cancellationToken: cancellationToken,
-          transaction: transaction
-        ));
-      }
+      await QueryAttachTagsToArticleAsyncAsync(
+        tagIds,
+        articleId,
+        connection,
+        transaction: transaction,
+        cancellationToken: cancellationToken
+      );
 
       var articleNext = await QueryGetArticleAsync(articleId, connection, cancellationToken, transaction);
       if (articleNext == null) throw new InvalidOperationException("Не удалось загрузить созданную статью");
@@ -149,7 +165,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
       throw;
     }
   }
-  
+
   public async Task DeleteArticleAsync(int id, CancellationToken cancellationToken = default) {
     // language=PostgreSQL
     await dpContext.ExecuteWithTransactionAsync(
@@ -157,5 +173,5 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
       parameters: new { Id = id },
       cancellationToken: cancellationToken
     );
-  } 
+  }
 }
