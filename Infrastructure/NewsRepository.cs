@@ -30,9 +30,9 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   }
 
   private async Task<NewsArticleDto?> QueryGetArticleAsync(
-    int id, 
-    IDbConnection connection, 
-    CancellationToken cancellationToken = default, 
+    int id,
+    IDbConnection connection,
+    CancellationToken cancellationToken = default,
     IDbTransaction? transaction = default) {
     // language=PostgreSQL
     var result = await connection.QueryFirstOrDefaultAsync<NewsArticleDto>(new CommandDefinition(
@@ -41,15 +41,40 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
       parameters: new { Id = id },
       cancellationToken: cancellationToken,
       transaction: transaction
-      ));
+    ));
 
     return result;
   }
-    
+
 
   public async Task<NewsArticleDto?> GetArticleAsync(int id, CancellationToken cancellationToken = default) {
-    using var connection = dpContext.OpenConnection(); 
+    using var connection = dpContext.OpenConnection();
     var result = await QueryGetArticleAsync(id, connection, cancellationToken);
+    return result;
+  }
+
+  private async Task<IEnumerable<int>> QueryTagCreateIfNotExistsAsync(
+    IEnumerable<string> tags,
+    IDbConnection connection,
+    CancellationToken cancellationToken = default,
+    IDbTransaction? transaction = default) {
+    var tagList = tags.ToList();
+    if (!tagList.Any()) return [];
+
+    // language=PostgreSQL
+    var result = await connection.QueryAsync<int>(new CommandDefinition(
+      @"
+        INSERT INTO tag (name)
+        SELECT unnest(@Names)
+        ON CONFLICT (name) DO NOTHING;
+
+        SELECT id FROM tag
+        WHERE name = ANY(@Names)
+      ",
+      parameters: new { Names = tagList },
+      transaction: transaction,
+      cancellationToken: cancellationToken));
+
     return result;
   }
 
@@ -58,8 +83,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
     using var connection = dpContext.OpenConnection();
     using var transaction = connection.BeginTransaction();
 
-    try
-    {
+    try {
       // language=PostgreSQL
       var articleId = await connection.QuerySingleAsync<int>(new CommandDefinition(
         @"
@@ -78,16 +102,36 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         transaction: transaction,
         cancellationToken: cancellationToken
       ));
+      
+      var tagIds = (await QueryTagCreateIfNotExistsAsync(
+        article.Tags ?? [],
+        connection: connection,
+        cancellationToken: cancellationToken,
+        transaction: transaction
+      )).ToList();
+
+      if (tagIds.Any()) {
+        // language=PostgreSQL
+        await connection.ExecuteAsync(new CommandDefinition(
+          @"
+            INSERT INTO news_article_tag (news_article_id, tag_id)
+            SELECT @ArticleId, unnest(@TagIds)
+            ON CONFLICT (news_article_id, tag_id) DO NOTHING;           
+          ",
+          parameters: new { ArticleId = articleId, TagIds = tagIds },
+          cancellationToken: cancellationToken,
+          transaction: transaction
+        ));
+      }
 
       var articleNext = await QueryGetArticleAsync(articleId, connection, cancellationToken, transaction);
       if (articleNext == null) throw new InvalidOperationException("Не удалось загрузить созданную статью");
-      
+
       transaction.Commit();
-      
+
       return articleNext;
     }
-    catch 
-    {
+    catch {
       transaction.Rollback();
       throw;
     }

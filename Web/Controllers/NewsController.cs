@@ -30,6 +30,7 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
       Title = article.Title,
       Content = article.Content,
       Summary = article.Summary,
+      Tags = article.Tags,
       PublicationDate = DateTime.UtcNow,
     };
     

@@ -23,25 +23,4 @@ public class TagsRepository(DpContext dpContext) : ITagsRepository {
       cancellationToken: cancellationToken
     );
   }
-
-  public async Task<IEnumerable<int>> CreateIfNotExistsAsync(IEnumerable<string> tags,
-    CancellationToken cancellationToken = default) {
-    var tagList = tags.ToList();
-
-    // language=PostgreSQL
-    var result = await dpContext.QueryWithTransactionAsync<int>(
-      @"
-        INSERT INTO tag (name)
-        SELECT unnest(@Names)
-        ON CONFLICT (name) DO NOTHING;
-
-        SELECT id FROM tag
-        WHERE name = ANY(@Names)
-      ",
-      parameters: new { Names = tagList },
-      cancellationToken: cancellationToken
-    );
-
-    return result;
-  }
 }
