@@ -8,5 +8,5 @@ public interface INewsRepository {
 
   Task<NewsArticleDto> CreateArticleAsync(NewsArticleCreateDto article, CancellationToken cancellationToken = default);
   Task<bool> DeleteArticleAsync(int id, CancellationToken cancellationToken = default);
-  Task<NewsArticleDto> UpdateArticleAsync(NewsArticleUpdateDto article, CancellationToken cancellationToken = default);
+  Task<NewsArticleDto?> UpdateArticleAsync(NewsArticleUpdateDto article, CancellationToken cancellationToken = default);
 }

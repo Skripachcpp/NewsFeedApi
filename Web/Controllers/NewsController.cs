@@ -53,6 +53,8 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
     };
     
     var result = await newsRepository.UpdateArticleAsync(newsArticleCreateDto);
+    if (result == null) return NotFound("Статья не найдена");
+    
     return OkResult(result);
   }
   

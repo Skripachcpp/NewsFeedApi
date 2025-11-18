@@ -155,7 +155,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
     }
   }
   
-  public async Task<NewsArticleDto> UpdateArticleAsync(
+  public async Task<NewsArticleDto?> UpdateArticleAsync(
     NewsArticleUpdateDto article,
     CancellationToken cancellationToken = default) {
     using var connection = dpContext.OpenConnection();
@@ -188,7 +188,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         cancellationToken: cancellationToken
       ));
       
-      if (articleId == null) throw new InvalidOperationException("Не удалось найти статью по ее идентификатору");
+      if (articleId == null) return null;
 
       await QueryCreateIfNotExistsTagAndAttachToArticleAsync(
         article.Tags ?? [],

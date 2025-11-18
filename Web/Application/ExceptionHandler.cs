@@ -11,7 +11,7 @@ public class ExceptionHandler(IProblemDetailsService problemDetailsService, ILog
       Exception = exception,
       
       ProblemDetails = new ProblemDetails() {
-        Title = exception.Message,
+        Title = exception.Message, // потенциально дыра
         Status = 500
       },
     };
