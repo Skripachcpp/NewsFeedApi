@@ -1,3 +1,5 @@
+using Domain.Interfaces;
+using Infrastructure;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +11,8 @@ if (connectionString == null) throw new Exception("Отсутствует connec
 builder.Services.AddDbContext<EfContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<DpContext>(_ => new DpContext(connectionString));
 // bd ^
+
+builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 
 builder.Services.AddControllers();
 
