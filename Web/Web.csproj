@@ -20,7 +20,6 @@
 
     <ItemGroup>
       <Folder Include="Application\" />
-      <Folder Include="Entity\" />
     </ItemGroup>
 
 </Project>

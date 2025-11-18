@@ -38,6 +38,28 @@ public class DpContext(string connectionString) {
 
     return result;
   }
+  
+  public async Task<T> QuerySingleWithTransactionAsync<T>(string sql,
+    CancellationToken cancellationToken = default, object? parameters = default) {
+    using var connection = OpenConnection();
+    var transaction = connection.BeginTransaction();
+
+    try {
+      var result = await connection.QuerySingleAsync<T>(new CommandDefinition(
+        sql,
+        parameters: parameters,
+        transaction: transaction,
+        cancellationToken: cancellationToken
+      ));
+
+      transaction.Commit();
+      return result;
+    }
+    catch {
+      transaction.Rollback();
+      throw;
+    }
+  }
 
   public async Task<IEnumerable<T>> QueryWithTransactionAsync<T>(string sql,
     CancellationToken cancellationToken = default, object? parameters = default) {

@@ -1,8 +1,10 @@
-using Domain.Entities;
+using Domain.DTOs;
 
 namespace Domain.Interfaces;
 
 public interface INewsRepository {
-  Task<IEnumerable<NewsArticle>> GetArticlesAsync(CancellationToken cancellationToken = default);
-  Task<NewsArticle?> GetArticleAsync(int id, CancellationToken cancellationToken = default);
+  Task<IEnumerable<NewsArticleDto>> GetArticlesAsync(CancellationToken cancellationToken = default);
+  Task<NewsArticleDto?> GetArticleAsync(int id, CancellationToken cancellationToken = default);
+
+  Task<NewsArticleDto> CreateArticleAsync(NewsArticleCreateDto article, CancellationToken cancellationToken = default);
 }
