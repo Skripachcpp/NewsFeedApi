@@ -15,11 +15,12 @@ public class DpContext(string connectionString) {
     return connection;
   }
 
-  public async Task<IEnumerable<T>> QueryAsync<T>(string sql, CancellationToken cancellationToken = default) {
+  public async Task<IEnumerable<T>> QueryAsync<T>(string sql, CancellationToken cancellationToken = default, object? parameters = default) {
     using var connection = OpenConnection();
 
     var result = await connection.QueryAsync<T>(new CommandDefinition(
       sql,
+      parameters: parameters,
       cancellationToken: cancellationToken
     ));
 

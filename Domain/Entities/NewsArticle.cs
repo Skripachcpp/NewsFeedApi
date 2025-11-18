@@ -16,9 +16,6 @@ public sealed class NewsArticle {
   // дата публикации
   public DateTime PublicationDate { get; set; }
 
-  // теги
-  public List<int> TagIds { get; set; } = new();
-
   // создатель
   public int? UserId { get; set; }
   

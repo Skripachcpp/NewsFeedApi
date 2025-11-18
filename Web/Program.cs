@@ -13,6 +13,8 @@ builder.Services.AddScoped<DpContext>(_ => new DpContext(connectionString));
 // bd ^
 
 builder.Services.AddScoped<ITagsRepository, TagsRepository>();
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
+
 
 builder.Services.AddControllers();
 
