@@ -9,21 +9,33 @@ namespace Infrastructure;
 
 public class NewsRepository(DpContext dpContext) : INewsRepository {
   // language=PostgreSQL
-  private const string BaseSelectQuery = @"
+  private const string BaseSelectQuerySelect = @"
    SELECT
-    id as Id,
-    title as Title,
-    content as Content,
-    summary as Summary,
-    publication_date as PublicationDate,
-    user_name as UserName
-  FROM news_article 
+    na.id as Id,
+    na.title as Title,
+    na.content as Content,
+    na.summary as Summary,
+    na.publication_date as PublicationDate,
+    na.user_name as UserName,
+    COALESCE(array_agg(t.name) FILTER (WHERE t.name IS NOT NULL), ARRAY[]::text[]) as Tags
+  FROM news_article na 
+  LEFT JOIN news_article_tag nat ON na.id = nat.news_article_id
+  LEFT JOIN tag t ON nat.tag_id = t.id
+  ";
+
+  
+  private const string BaseSelectQueryEnding = @"
+  GROUP BY na.id, na.title, na.content, na.summary, na.publication_date, na.user_name
+  ORDER BY na.publication_date DESC
   ";
 
   public async Task<IEnumerable<NewsArticleDto>> GetArticlesAsync(CancellationToken cancellationToken = default) {
     // language=PostgreSQL
     var result = await dpContext.QueryAsync<NewsArticleDto>(
-      BaseSelectQuery,
+  $@"
+        {BaseSelectQuerySelect}
+        {BaseSelectQueryEnding}
+      ",
       cancellationToken: cancellationToken);
 
     return result;
@@ -36,8 +48,9 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
     IDbTransaction? transaction = default) {
     // language=PostgreSQL
     var result = await connection.QueryFirstOrDefaultAsync<NewsArticleDto>(new CommandDefinition(
-      $@"{BaseSelectQuery}
-        WHERE id = @Id",
+      $@"{BaseSelectQuerySelect}
+        WHERE na.id = @Id
+        {BaseSelectQueryEnding}",
       parameters: new { Id = id },
       cancellationToken: cancellationToken,
       transaction: transaction
@@ -102,7 +115,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         transaction: transaction,
         cancellationToken: cancellationToken
       ));
-      
+
       var tagIds = (await QueryTagCreateIfNotExistsAsync(
         article.Tags ?? [],
         connection: connection,

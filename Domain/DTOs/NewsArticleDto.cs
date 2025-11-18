@@ -7,4 +7,5 @@ public class NewsArticleDto {
   public string? Summary { get; set; }
   public DateTime PublicationDate { get; set; }
   public string? UserName { get; set; }
+  public string[]? Tags { get; set; }
 }
