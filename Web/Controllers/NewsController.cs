@@ -10,13 +10,13 @@ namespace Web.Controllers;
 [Route("[controller]")]
 public class NewsController(INewsRepository newsRepository) : ControllerBase {
   [HttpGet("/v1/article/{id}")]
-  public async Task<ActionResult<IEnumerable<NewsArticle>>> GetArticle(int id) {
+  public async Task<ActionResult<NewsArticleDto?>> GetArticle(int id) {
     var result = await newsRepository.GetArticleAsync(id);
     return Ok(result);
   }
   
-  [HttpGet("/v1/article")]
-  public async Task<ActionResult<IEnumerable<NewsArticle>>> GetArticles() {
+  [HttpGet("/v1/articles")]
+  public async Task<ActionResult<IEnumerable<NewsArticleDto>>> GetArticles() {
     var result = await newsRepository.GetArticlesAsync();
     return Ok(result);
   }
@@ -38,13 +38,12 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
     return Ok(result);
   }
   
-  [HttpPatch("/v1/article/{id}")]
+  [HttpPatch("/v1/article")]
   public async Task<ActionResult<NewsArticleDto>> UpdateArticle(
-    int id, // странно конечно тут выглядит id
-    [FromBody] ArticleCreateRequest article
+    [FromBody] ArticleUpdateRequest article
   ) {
     var newsArticleCreateDto = new NewsArticleUpdateDto {
-      Id = id,
+      Id = article.Id,
       Title = article.Title,
       Content = article.Content,
       Summary = article.Summary,
