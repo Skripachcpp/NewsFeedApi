@@ -2,16 +2,17 @@ using Domain.DTOs;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Web.Application;
 
 namespace Web.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TagsController(ITagsRepository tagsRepository) : ControllerBase {
+public class TagsController(ITagsRepository tagsRepository) : BaseController {
   [HttpGet("v1/tags")]
   public async Task<ActionResult<IEnumerable<TagDto>>> GetTags(CancellationToken cancellationToken = default) {
     var result = await tagsRepository.GetTags(cancellationToken);
-    return Ok(result);
+    return OkResult(result);
   }
 
   [HttpDelete("v1/tags/{id}")]

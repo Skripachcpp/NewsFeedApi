@@ -2,24 +2,25 @@ using Domain.DTOs;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Web.Application;
 using Web.Entity;
 
 namespace Web.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class NewsController(INewsRepository newsRepository) : ControllerBase {
+public class NewsController(INewsRepository newsRepository) : BaseController {
   [HttpGet("/v1/article/{id}")]
-  public async Task<ActionResult<NewsArticleDto?>> GetArticle(int id) {
+  public async Task<ActionResult<NewsArticleDto>> GetArticle(int id) {
     var result = await newsRepository.GetArticleAsync(id);
     if (result == null) return NotFound();
-    return Ok(result);
+    return OkResult(result);
   }
   
   [HttpGet("/v1/articles")]
   public async Task<ActionResult<IEnumerable<NewsArticleDto>>> GetArticles() {
     var result = await newsRepository.GetArticlesAsync();
-    return Ok(result);
+    return OkResult(result);
   }
   
   [HttpPost("/v1/article")]
@@ -35,7 +36,7 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
     };
     
     var result = await newsRepository.CreateArticleAsync(newsArticleCreateDto);
-    return Ok(result);
+    return OkResult(result);
   }
   
   [HttpPatch("/v1/article")]
@@ -52,7 +53,7 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
     };
     
     var result = await newsRepository.UpdateArticleAsync(newsArticleCreateDto);
-    return Ok(result);
+    return OkResult(result);
   }
   
   [HttpDelete("/v1/article/{id}")]
