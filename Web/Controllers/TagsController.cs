@@ -1,3 +1,4 @@
+using Domain.DTOs;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ namespace Web.Controllers;
 [Route("[controller]")]
 public class TagsController(ITagsRepository tagsRepository) : ControllerBase {
   [HttpGet("v1/tags")]
-  public async Task<ActionResult<IEnumerable<Tag>>> GetTags(CancellationToken cancellationToken = default) {
+  public async Task<ActionResult<IEnumerable<TagDto>>> GetTags(CancellationToken cancellationToken = default) {
     var result = await tagsRepository.GetTags(cancellationToken);
     return Ok(result);
   }

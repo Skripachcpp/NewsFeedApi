@@ -51,5 +51,18 @@ public class EfContext(DbContextOptions<EfContext> options): DbContext(options) 
         .IsRequired()
         .HasMaxLength(100);
     });
+    
+    modelBuilder.Entity<NewsArticle>()
+      .HasMany<Tag>()
+      .WithMany()
+      .UsingEntity<Dictionary<string, object>>(
+        "news_article_tag",
+        join => join.HasOne<Tag>().WithMany().HasForeignKey("tag_id"),
+        join => join.HasOne<NewsArticle>().WithMany().HasForeignKey("news_article_id"),
+        join => {
+          join.HasKey("news_article_id", "tag_id");
+          join.ToTable("news_article_tag");
+        }
+      );
   }
 }
