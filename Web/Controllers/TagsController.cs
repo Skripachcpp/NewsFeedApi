@@ -7,15 +7,15 @@ namespace Web.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class TagsController(ITagsRepository tagsRepository) : ControllerBase {
-  // [HttpGet("v1/tags")]
-  // public async Task<Tag> GetTags(CancellationToken cancellationToken = default) {
-  //   tagsRepository.GetTags(cancellationToken)
-  // }
-  
-  // [HttpPost("/v1/test")]
-  // public async Task<ActionResult> Test(
-  //   CancellationToken cancellationToken = default) {
-  //   await tagsRepository.CreateIfNotExistsAsync(new List<string> {"Спорт", "Популярное"}, cancellationToken);
-  //   return Ok();
-  // }
+  [HttpGet("v1/tags")]
+  public async Task<ActionResult<IEnumerable<Tag>>> GetTags(CancellationToken cancellationToken = default) {
+    var result = await tagsRepository.GetTags(cancellationToken);
+    return Ok(result);
+  }
+
+  [HttpDelete("v1/tags/{id}")]
+  public async Task<ActionResult> DeleteTag(int id, CancellationToken cancellationToken = default) {
+    await tagsRepository.DeleteTag(id, cancellationToken);
+    return Ok();
+  }
 }

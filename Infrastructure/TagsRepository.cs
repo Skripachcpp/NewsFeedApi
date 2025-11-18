@@ -9,13 +9,13 @@ public class TagsRepository(DpContext dpContext) : ITagsRepository {
     // language=PostgreSQL
     var result = await dpContext.QueryAsync<Tag>(
       @"SELECT id as Id, name as Name FROM tag",
-      cancellationToken
+      cancellationToken: cancellationToken
     );
 
     return result;
   }
 
-  public async Task DeleteTag(string id, CancellationToken cancellationToken = default) {
+  public async Task DeleteTag(int id, CancellationToken cancellationToken = default) {
     // language=PostgreSQL
     await dpContext.ExecuteWithTransactionAsync(
       @"DELETE FROM tag WHERE id = @Id",
