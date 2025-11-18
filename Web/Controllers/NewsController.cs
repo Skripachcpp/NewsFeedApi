@@ -37,4 +37,11 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
     var result = await newsRepository.CreateArticleAsync(newsArticleCreateDto);
     return Ok(result);
   }
+  
+  [HttpDelete("/v1/article/{id}")]
+  public async Task DeleteArticle(
+    int id
+  ) {
+    await newsRepository.DeleteArticleAsync(id);
+  }
 }
