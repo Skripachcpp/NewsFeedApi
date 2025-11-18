@@ -13,6 +13,14 @@ builder.Services.AddDbContext<EfContext>(options => options.UseNpgsql(connection
 builder.Services.AddScoped<DpContext>(_ => new DpContext(connectionString));
 // bd ^
 
+builder.Services.AddCors(options => {
+  options.AddDefaultPolicy(policy => {
+    policy.AllowAnyOrigin()
+      .AllowAnyMethod()
+      .AllowAnyHeader();
+  });
+});
+
 builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 
@@ -33,6 +41,8 @@ app.UseOpenApi();
 app.UseSwaggerUi();
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 // кастомный обработчик ошибок
 app.UseExceptionHandler();
