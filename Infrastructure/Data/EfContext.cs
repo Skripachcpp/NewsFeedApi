@@ -13,6 +13,7 @@ public class EfContext(DbContextOptions<EfContext> options): DbContext(options) 
       entity.HasKey(e => e.Id);
       entity.HasIndex(c => c.Id).IsUnique();
       entity.HasIndex(e => e.PublicationDate);
+      
       entity.Property(e => e.Id)
         .HasColumnName("id")
         .ValueGeneratedOnAdd();
@@ -34,6 +35,21 @@ public class EfContext(DbContextOptions<EfContext> options): DbContext(options) 
       entity.Property(e => e.UserName)
         .HasColumnName("user_name")
         .HasMaxLength(200);
+    });
+    
+    modelBuilder.Entity<Tag>(entity => {
+      entity.ToTable("tag");
+      entity.HasKey(e => e.Id);
+      entity.HasIndex(c => c.Id).IsUnique();
+      entity.HasIndex(e => e.Name).IsUnique();
+      
+      entity.Property(e => e.Id)
+        .HasColumnName("id")
+        .ValueGeneratedOnAdd();
+      entity.Property(e => e.Name)
+        .HasColumnName("name")
+        .IsRequired()
+        .HasMaxLength(100);
     });
   }
 }

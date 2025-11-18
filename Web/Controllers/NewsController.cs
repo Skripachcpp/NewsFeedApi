@@ -12,6 +12,7 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
   [HttpGet("/v1/article/{id}")]
   public async Task<ActionResult<NewsArticleDto?>> GetArticle(int id) {
     var result = await newsRepository.GetArticleAsync(id);
+    if (result == null) return NotFound();
     return Ok(result);
   }
   
@@ -25,7 +26,6 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
   public async Task<ActionResult<NewsArticleDto>> CreateArticle(
     [FromBody] ArticleCreateRequest article
     ) {
-
     var newsArticleCreateDto = new NewsArticleCreateDto {
       Title = article.Title,
       Content = article.Content,
@@ -62,6 +62,4 @@ public class NewsController(INewsRepository newsRepository) : ControllerBase {
     await newsRepository.DeleteArticleAsync(id);
     return Ok();
   }
-  
-  
 }
