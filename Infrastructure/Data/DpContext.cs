@@ -6,7 +6,10 @@ namespace Infrastructure.Data;
 public class DpContext(string connectionString) {
   private readonly string _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
   
-  public IDbConnection Connection() {
-    return new NpgsqlConnection(_connectionString);
+  public IDbConnection OpenConnection() {
+    var connection = new NpgsqlConnection(_connectionString);
+    connection.Open();
+    
+    return connection;
   }
 }
