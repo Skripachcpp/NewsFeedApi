@@ -5,16 +5,15 @@ namespace Web.Entity;
 
 public record ArticleCreateRequest
 {
-  [Required(ErrorMessage = "заголовок обязателен")]
-  [StringLength(500, MinimumLength = 1, ErrorMessage = "заголовок должен быть от 1 до 500 символов")]
+  [Validate(Required = true, Min = 1, Max = 500)]
   public required string Title { get; init; }
   
-  [Required(ErrorMessage = "содержание обязательно")]
+  [Validate(Required = true)]
   public required  string Content { get; init; }
   
-  [StringLength(1000, ErrorMessage = "описание не должно превышать 1000 символов")]
+  [Validate(Max = 1000)]
   public string? Summary { get; init; }
   
-  [StringsLength(100, ErrorMessage = "длина тега не должна превышать 100 символов")]
+  [Validate(Max = 100)]
   public string[]? Tags { get; init; }
 }

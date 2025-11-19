@@ -4,6 +4,6 @@ using Web.Application;
 namespace Web.Entity;
 
 public record ArticleUpdateRequest : ArticleCreateRequest {
-  [Required(ErrorMessage = "идентификатор обязателен")]
-  public int Id { get; init; }
+  [Validate(Min = 0, ErrorMessage = "обязательно")]
+  public int Id { get; init; } = -1;
 }
