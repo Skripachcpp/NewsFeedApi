@@ -1,7 +1,10 @@
+using System.Text;
 using Domain.Interfaces;
 using Infrastructure;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Web.Application;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +26,27 @@ builder.Services.AddCors(options => {
 
 builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
+
+// настройки авторизации
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"]!;
+
+builder.Services.AddAuthentication(options => {
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options => {
+  options.TokenValidationParameters = new TokenValidationParameters {
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+    ValidateIssuer = true,
+    ValidIssuer = jwtSettings["Issuer"],
+    ValidateAudience = true,
+    ValidAudience = jwtSettings["Audience"],
+    ValidateLifetime = true,
+    ClockSkew = TimeSpan.Zero
+  };
+});
 
 builder.Services.AddControllers();
 
@@ -63,6 +87,7 @@ app.UseCors();
 // кастомный обработчик ошибок
 app.UseExceptionHandler();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,6 +1,7 @@
 using Domain.DTOs;
 using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application;
 using Web.Entity;
@@ -23,6 +24,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
     return OkResult(result);
   }
   
+  [Authorize]
   [HttpPost("/v1/article")]
   public async Task<ActionResult<NewsArticleDto>> CreateArticle(
     [FromBody] ArticleCreateRequest article
@@ -39,6 +41,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
     return OkResult(result);
   }
   
+  [Authorize]
   [HttpPatch("/v1/article")]
   public async Task<ActionResult<NewsArticleDto>> UpdateArticle(
     [FromBody] ArticleUpdateRequest article
@@ -58,6 +61,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
     return OkResult(result);
   }
   
+  [Authorize]
   [HttpDelete("/v1/article/{id}")]
   public async Task<ActionResult> DeleteArticle(
     int id

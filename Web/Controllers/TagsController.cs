@@ -1,6 +1,7 @@
 using Domain.DTOs;
 using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application;
 
@@ -15,7 +16,7 @@ public class TagsController(ITagsRepository tagsRepository) : BaseController {
     return OkResult(result);
   }
 
-  // [Authorize]
+  [Authorize]
   [HttpDelete("v1/tags/{id}")]
   public async Task<ActionResult> DeleteTag(int id, CancellationToken cancellationToken = default) {
     await tagsRepository.DeleteTag(id, cancellationToken);
