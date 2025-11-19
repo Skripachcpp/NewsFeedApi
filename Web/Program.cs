@@ -32,9 +32,25 @@ builder.Services.AddOpenApi();
 
 // кастомный обработчик ошибок
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<ExceptionHandler>(); 
+builder.Services.AddExceptionHandler<ExceptionHandler>();
 
 var app = builder.Build();
+
+// применение миграций при старте
+using (var scope = app.Services.CreateScope()) {
+  var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+  var context = scope.ServiceProvider.GetRequiredService<EfContext>();
+  
+  try {
+    logger.LogInformation("Применение миграций базы данных");
+    await context.Database.MigrateAsync();
+    logger.LogInformation("Миграции успешно применены.");
+  }
+  catch (Exception ex) {
+    logger.LogError(ex, "Ошибка при применении миграций");
+    throw;
+  }
+}
 
 // свагер пусть будет и в продакшене
 app.UseOpenApi();
