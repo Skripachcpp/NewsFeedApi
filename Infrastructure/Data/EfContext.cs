@@ -16,7 +16,7 @@ public class EfContext(DbContextOptions<EfContext> options): DbContext(options) 
       
       entity.Property(e => e.Id)
         .HasColumnName("id")
-        .ValueGeneratedOnAdd();
+        .UseIdentityColumn();
       entity.Property(e => e.Title)
         .HasColumnName("title")
         .HasMaxLength(500);
@@ -64,7 +64,7 @@ public class EfContext(DbContextOptions<EfContext> options): DbContext(options) 
       
       entity.Property(e => e.Id)
         .HasColumnName("id")
-        .ValueGeneratedOnAdd();
+        .UseIdentityColumn();
       entity.Property(e => e.Name)
         .HasColumnName("name")
         .IsRequired()

@@ -26,7 +26,7 @@ builder.Services.AddScoped<INewsRepository, NewsRepository>();
 
 builder.Services.AddControllers();
 
-builder.Services.AddOpenApiDocument();
+builder.Services.AddOpenApiDocument(); // swagger
 
 builder.Services.AddOpenApi();
 
