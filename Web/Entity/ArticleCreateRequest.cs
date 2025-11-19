@@ -6,7 +6,7 @@ namespace Web.Entity;
 public record ArticleCreateRequest
 {
   [Required(ErrorMessage = "заголовок обязателен")]
-  [StringLength(500, MinimumLength = 1, ErrorMessage = "Заголовок должен быть от 1 до 500 символов")]
+  [StringLength(500, MinimumLength = 1, ErrorMessage = "заголовок должен быть от 1 до 500 символов")]
   public required string Title { get; init; }
   
   [Required(ErrorMessage = "содержание обязательно")]
