@@ -1,0 +1,63 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.sln.DotSettings.user
+*.sln.iml
+
+# Test projects
+**/Infrastructure.Tests/
+**/*Tests/
+**/*Test/
+
+# NuGet
+**/packages/
+*.nupkg
+*.snupkg
+**/project.lock.json
+**/project.fragment.lock.json
+
+# Logs
+*.log
+**/logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Documentation
+README.md
+READMY.md
+*.md
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Environment files (will be set via docker-compose)
+**/.env
+**/.env.*
+
