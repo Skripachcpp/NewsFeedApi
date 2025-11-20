@@ -28,16 +28,23 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   ORDER BY na.publication_date DESC
   ";
 
-  public async Task<IEnumerable<NewsArticleDto>> GetArticlesAsync(CancellationToken cancellationToken = default) {
-    // language=PostgreSQL
-    var result = await dpContext.QueryAsync<NewsArticleDto>(
-      $@"
-        {BaseSelectQuerySelect}
-        {BaseSelectQueryEnding}
-      ",
-      cancellationToken: cancellationToken);
-
-    return result;
+  public async Task<PageDto<NewsArticleDto>> GetArticlesAsync(
+    int offset = 0,
+    int count = 100,
+    CancellationToken cancellationToken = default
+  ) {
+    using var connection = dpContext.OpenConnection();
+    var page = await dpContext.PageAsync<NewsArticleDto>(
+        // language=PostgreSQL
+        $@"
+          {BaseSelectQuerySelect}
+          {BaseSelectQueryEnding}
+        ",
+        // language=PostgreSQL
+        @"SELECT COUNT(id) as cnt FROM news_article",
+        cancellationToken: cancellationToken
+    );
+    return page;
   }
 
   private async Task<NewsArticleDto?> QueryGetArticleAsync(
@@ -68,11 +75,9 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   private async Task QueryCreateIfNotExistsTagAndAttachToArticleAsync(
     IEnumerable<string> tagNames,
     int articleId,
-    
     IDbConnection connection,
     CancellationToken cancellationToken = default,
     IDbTransaction? transaction = default) {
-    
     var tagNamesList = tagNames.ToList();
     if (!tagNamesList.Any()) return;
 
@@ -154,7 +159,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
       throw;
     }
   }
-  
+
   public async Task<NewsArticleDto?> UpdateArticleAsync(
     NewsArticleUpdateDto article,
     CancellationToken cancellationToken = default) {
@@ -181,14 +186,14 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
           Content = article.Content,
           Summary = article.Summary,
           // пусть дата обновляется при изменении стати
-          PublicationDate = DateTime.UtcNow, 
+          PublicationDate = DateTime.UtcNow,
           UserId = article.UserId,
           UserName = article.UserName
         },
         transaction: transaction,
         cancellationToken: cancellationToken
       ));
-      
+
       if (articleId == null) return null;
 
       await QueryCreateIfNotExistsTagAndAttachToArticleAsync(
