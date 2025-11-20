@@ -28,8 +28,12 @@ public class NewsController(
     int count = 100,
     CancellationToken cancellationToken = default
   ) {
+    if (offset < 0) offset = 0;
+    if (count < 0) count = 100;
+    if (count > 1000) return BadRequest("count не может быть больше 1000");
+    
     // ну не знаю, глаза ломаются, возможно если управлять кешем вручную это будет легче читаться
-    var page = await cacheRepository.AutoCashAsync(CacheKeyArticles, [offset.ToString(), count.ToString()],
+    var page = await cacheRepository.AutoCacheAsync(CacheKeyArticles, [offset.ToString(), count.ToString()],
       async () => await newsRepository.GetArticlesAsync(offset, count, cancellationToken));
 
     return OkResult(page);
