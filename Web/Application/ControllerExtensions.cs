@@ -12,7 +12,7 @@ public abstract class BaseController : ControllerBase {
     return Ok(value);
   }
 
-  protected record class UserInfo(int Id, string Name);
+  protected sealed record UserInfo(int Id, string Name);
   
   protected UserInfo? GetUserInfo() {
     var userIdExist = int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId);

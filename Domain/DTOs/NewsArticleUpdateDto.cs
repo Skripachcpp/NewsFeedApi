@@ -1,6 +1,6 @@
 namespace Domain.DTOs;
 
-public class NewsArticleUpdateDto {
+public sealed record NewsArticleUpdateDto {
   public int Id { get; init; }
   public required string Title { get; init; }
   public required string Content { get; init; }
