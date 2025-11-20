@@ -12,21 +12,21 @@ namespace Web.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class NewsController(INewsRepository newsRepository) : BaseController {
-  [HttpGet("/v1/article/{id}")]
+  [HttpGet("article/{id}")]
   public async Task<ActionResult<NewsArticleDto>> GetArticle(int id, CancellationToken cancellationToken = default) {
     var result = await newsRepository.GetArticleAsync(id, cancellationToken);
-    if (result == null) return NotFound("Статья не найдена");
+    if (result == null) return NotFound("статья не найдена");
     return OkResult(result);
   }
   
-  [HttpGet("/v1/articles")]
+  [HttpGet("articles")]
   public async Task<ActionResult<IEnumerable<NewsArticleDto>>> GetArticles(CancellationToken cancellationToken = default) {
     var result = await newsRepository.GetArticlesAsync(cancellationToken);
     return OkResult(result);
   }
   
   [Authorize]
-  [HttpPost("/v1/article")]
+  [HttpPost("article")]
   public async Task<ActionResult<NewsArticleDto>> CreateArticle(
     [FromBody] ArticleCreateRequest article,
     CancellationToken cancellationToken = default
@@ -47,7 +47,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   }
   
   [Authorize]
-  [HttpPatch("/v1/article")]
+  [HttpPatch("article")]
   public async Task<ActionResult<NewsArticleDto>> UpdateArticle(
     [FromBody] ArticleUpdateRequest article,
     CancellationToken cancellationToken = default
@@ -65,19 +65,19 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
       UserName = userInfo.Name
     }, cancellationToken);
     
-    if (result == null) return NotFound("Статья не найдена");
+    if (result == null) return NotFound("статья не найдена");
     
     return OkResult(result);
   }
   
   [Authorize]
-  [HttpDelete("/v1/article/{id}")]
+  [HttpDelete("article/{id}")]
   public async Task<ActionResult> DeleteArticle(
     int id,
     CancellationToken cancellationToken = default
   ) {
     var success = await newsRepository.DeleteArticleAsync(id, cancellationToken);
-    if (success == false) return NotFound("Статья не найдена");
+    if (success == false) return NotFound("статья не найдена");
     
     return Ok();
   }

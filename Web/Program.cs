@@ -32,21 +32,21 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"]!;
 
 builder.Services.AddAuthentication(options => {
-  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options => {
-  options.TokenValidationParameters = new TokenValidationParameters {
-    ValidateIssuerSigningKey = true,
-    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-    ValidateIssuer = true,
-    ValidIssuer = jwtSettings["Issuer"],
-    ValidateAudience = true,
-    ValidAudience = jwtSettings["Audience"],
-    ValidateLifetime = true,
-    ClockSkew = TimeSpan.Zero
-  };
-});
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  })
+  .AddJwtBearer(options => {
+    options.TokenValidationParameters = new TokenValidationParameters {
+      ValidateIssuerSigningKey = true,
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+      ValidateIssuer = true,
+      ValidIssuer = jwtSettings["Issuer"],
+      ValidateAudience = true,
+      ValidAudience = jwtSettings["Audience"],
+      ValidateLifetime = true,
+      ClockSkew = TimeSpan.Zero
+    };
+  });
 
 builder.Services.AddControllers();
 
@@ -58,13 +58,18 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 
+builder.Services.Configure<RouteOptions>(options => {
+  options.LowercaseUrls = true;
+  options.LowercaseQueryStrings = true;
+});
+
 var app = builder.Build();
 
 // применение миграций при старте
 using (var scope = app.Services.CreateScope()) {
   var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
   var context = scope.ServiceProvider.GetRequiredService<EfContext>();
-  
+
   try {
     logger.LogInformation("Применение миграций базы данных");
     await context.Database.MigrateAsync();
@@ -74,6 +79,10 @@ using (var scope = app.Services.CreateScope()) {
     logger.LogError(ex, "Ошибка при применении миграций");
     throw;
   }
+}
+
+if (app.Environment.IsDevelopment()) {
+  app.Urls.Add("http://localhost:5058");
 }
 
 // свагер пусть будет и в продакшене
