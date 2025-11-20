@@ -9,7 +9,7 @@ public class Validate() : ValidationAttribute {
   public int Min { get; set; } = int.MinValue;
   public bool Required { get; set; } = false;
 
-  private string? MessageString => ErrorMessage ?? $"должно содержать {(Min != int.MinValue ? $"от {Min} " : string.Empty)}{(Max != int.MinValue ? $"до {Max} " : string.Empty)}символ(ов)";
+  private string? MessageString => ErrorMessage ?? $"{(Required ? "обязательно, " : "")}должно содержать {(Min != int.MinValue ? $"от {Min} " : string.Empty)}{(Max != int.MinValue ? $"до {Max} " : string.Empty)}символ(ов)";
   
   protected override ValidationResult? IsValid(object? value, ValidationContext validationContext) {
     if (Required && value == null) return new ValidationResult("обязательно");
@@ -32,6 +32,9 @@ public class Validate() : ValidationAttribute {
     if (value is string[] textArray) {
       if (Min != int.MinValue && textArray.Any(it => it.Length < Min)) return new ValidationResult(MessageString);
       if (Max != int.MinValue && textArray.Any(it => it.Length > Max)) return new ValidationResult(MessageString);
+
+      // в массиве должно что то быть иначе какой он обязательный
+      if (Required && !textArray.Any()) return new ValidationResult(MessageString);
 
       return ValidationResult.Success;
     }

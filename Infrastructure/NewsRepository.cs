@@ -126,7 +126,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
           Title = article.Title,
           Content = article.Content,
           Summary = article.Summary,
-          PublicationDate = article.PublicationDate,
+          PublicationDate = DateTime.Now,
           UserId = article.UserId,
           UserName = article.UserName
         },
@@ -180,7 +180,8 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
           Title = article.Title,
           Content = article.Content,
           Summary = article.Summary,
-          PublicationDate = article.PublicationDate,
+          // пусть дата обновляется при изменении стати
+          PublicationDate = DateTime.Now, 
           UserId = article.UserId,
           UserName = article.UserName
         },

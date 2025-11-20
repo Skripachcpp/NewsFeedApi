@@ -33,17 +33,15 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
     var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
     var userName = User.FindFirst(ClaimTypes.Name)!.Value;
     
-    var newsArticleCreateDto = new NewsArticleCreateDto {
+    var result = await newsRepository.CreateArticleAsync(new NewsArticleCreateDto {
       Title = article.Title,
       Content = article.Content,
       Summary = article.Summary,
       Tags = article.Tags,
-      PublicationDate = DateTime.UtcNow,
       UserId = userId,
       UserName = userName
-    };
+    });
     
-    var result = await newsRepository.CreateArticleAsync(newsArticleCreateDto);
     return OkResult(result);
   }
   
@@ -52,16 +50,19 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   public async Task<ActionResult<NewsArticleDto>> UpdateArticle(
     [FromBody] ArticleUpdateRequest article
   ) {
-    var newsArticleCreateDto = new NewsArticleUpdateDto {
+    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    var userName = User.FindFirst(ClaimTypes.Name)!.Value;
+    
+    var result = await newsRepository.UpdateArticleAsync(new NewsArticleUpdateDto {
       Id = article.Id,
       Title = article.Title,
       Content = article.Content,
       Summary = article.Summary,
       Tags = article.Tags,
-      PublicationDate = DateTime.UtcNow,
-    };
+      UserName = userName,
+      UserId = userId // теперь это его статья
+    });
     
-    var result = await newsRepository.UpdateArticleAsync(newsArticleCreateDto);
     if (result == null) return NotFound("Статья не найдена");
     
     return OkResult(result);
