@@ -11,7 +11,7 @@ namespace Web.Controllers;
 public class TagsController(ITagsRepository tagsRepository) : BaseController {
   [HttpGet("tags")]
   public async Task<ActionResult<IEnumerable<TagDto>>> GetTags(CancellationToken cancellationToken = default) {
-    var result = await tagsRepository.GetTags(cancellationToken);
+    var result = (await tagsRepository.GetTags(cancellationToken));
     return OkResult(result);
   }
 

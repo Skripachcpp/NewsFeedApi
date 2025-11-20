@@ -9,7 +9,10 @@ namespace Web.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class NewsController(INewsRepository newsRepository) : BaseController {
+public class NewsController(
+  INewsRepository newsRepository,
+  ICacheRepository cacheRepository
+) : BaseController {
   [HttpGet("article/{id}")]
   public async Task<ActionResult<NewsArticleDto>> GetArticle(int id, CancellationToken cancellationToken = default) {
     var result = await newsRepository.GetArticleAsync(id, cancellationToken);
@@ -17,13 +20,18 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
     return OkResult(result);
   }
 
+  private const string CacheKeyArticles = "articles";
+
   [HttpGet("articles")]
   public async Task<ActionResult<PageDto<NewsArticleDto>>> GetArticles(
     int offset = 0,
     int count = 100,
     CancellationToken cancellationToken = default
   ) {
-    var page = await newsRepository.GetArticlesAsync(offset, count, cancellationToken);
+    // ну не знаю, глаза ломаются, возможно если управлять кешем вручную это будет легче читаться
+    var page = await cacheRepository.AutoCashAsync(CacheKeyArticles, [offset.ToString(), count.ToString()],
+      async () => await newsRepository.GetArticlesAsync(offset, count, cancellationToken));
+
     return OkResult(page);
   }
 
@@ -45,6 +53,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
       UserName = userInfo.Name
     }, cancellationToken);
 
+    await cacheRepository.Clear(CacheKeyArticles);
     return OkResult(result);
   }
 
@@ -69,6 +78,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
 
     if (result == null) return NotFound("статья не найдена");
 
+    await cacheRepository.Clear(CacheKeyArticles);
     return OkResult(result);
   }
 
@@ -81,6 +91,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
     var success = await newsRepository.DeleteArticleAsync(id, cancellationToken);
     if (success == false) return NotFound("статья не найдена");
 
+    await cacheRepository.Clear(CacheKeyArticles);
     return Ok();
   }
 }

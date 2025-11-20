@@ -5,6 +5,7 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using Web.Application;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,21 @@ builder.Services.AddCors(options => {
 
 builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
+builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+
+// redis _
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+if (redisConnectionString == null) throw new Exception("Отсутствует connection string для redis");
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp => ConnectionMultiplexer.Connect(redisConnectionString));
+builder.Services.AddSingleton<Lazy<IConnectionMultiplexer>>(sp =>
+  new Lazy<IConnectionMultiplexer>(sp.GetRequiredService<IConnectionMultiplexer>));
+
+builder.Services.AddStackExchangeRedisCache(options => {
+  options.Configuration = redisConnectionString;
+  options.InstanceName = "NewsFeed_";
+});
+// redis ^
 
 // настройки авторизации
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
