@@ -3,13 +3,11 @@ using System.ComponentModel.DataAnnotations;
 namespace Web.Application;
 
 public class Validate() : ValidationAttribute {
-  public int Max { get; set; } = int.MinValue;
-  public int Min { get; set; } = int.MinValue;
+  public int Max { get; set; } = -1;
+  public int Min { get; set; } = -1;
   public bool Required { get; set; } = false;
 
-  private string? MessageString => ErrorMessage != null 
-      ? ErrorMessage.Replace("{min}", Min.ToString()).Replace("{max}", Max.ToString())
-      : $"должно содержать {(Min != int.MinValue ? $"от {Min} " : string.Empty)}{(Max != int.MinValue ? $"до {Max} " : string.Empty)}символ(ов)";
+  private string? Message => ErrorMessage ?? $"должно содержать {(Min != -1 ? $"от {Min} " : string.Empty)}{(Max != -1 ? $"до {Max} " : string.Empty)}символ(ов)";
   
   protected override ValidationResult? IsValid(object? value, ValidationContext validationContext) {
     if (Required && value == null) return new ValidationResult("обязательно");
@@ -17,23 +15,16 @@ public class Validate() : ValidationAttribute {
     if (value == null) return ValidationResult.Success;
     
     if (value is string text) {
-      if (Min != int.MinValue && text.Length < Min) return new ValidationResult(MessageString);
-      if (Max != int.MinValue && text.Length > Max) return new ValidationResult(MessageString);
+      if (Min != -1 && text.Length < Min) return new ValidationResult(Message);
+      if (Max != -1 && text.Length > Max) return new ValidationResult(Message);
 
       return ValidationResult.Success;
     }
 
-    if (value is string[] textArray) {
-      if (Min != int.MinValue && textArray.Any(it => it.Length < Min)) return new ValidationResult(MessageString);
-      if (Max != int.MinValue && textArray.Any(it => it.Length > Max)) return new ValidationResult(MessageString);
+    if (value is string[] stringArray) {
+      if (Min != -1 && stringArray.Any(it => it.Length < Min)) return new ValidationResult(Message);
+      if (Max != -1 && stringArray.Any(it => it.Length > Max)) return new ValidationResult(Message);
 
-      return ValidationResult.Success;
-    }
-
-    if (value is int numeric) {
-      if (Min != int.MinValue && numeric < Min) return new ValidationResult(ErrorMessage ?? $"не должно быть меньше {Min}");
-      if (Max != int.MinValue && numeric > Max) return new ValidationResult(ErrorMessage ?? $"не должно быть больше {Max}");
-      
       return ValidationResult.Success;
     }
 

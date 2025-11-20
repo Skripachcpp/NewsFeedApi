@@ -7,7 +7,7 @@ public abstract class BaseController : ControllerBase {
     return Ok(value);
   }
   
-  protected ActionResult<T?> OkNullableResult<T>(T? value) where T : class {
+  protected ActionResult<T?> OkResultNullable<T>(T? value) where T : class {
     return Ok(value);
   }
 }
