@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Web.Application;
 
 namespace Web.Entity;
