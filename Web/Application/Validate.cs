@@ -23,7 +23,7 @@ public class Validate() : ValidationAttribute {
       if (MaxBytes != int.MinValue) {
         int byteLength = Encoding.UTF8.GetByteCount(text);
             
-        if (MaxBytes != -1 && byteLength > MaxBytes) return new ValidationResult("слишком длинный текст");
+        if (MaxBytes != int.MinValue && byteLength > MaxBytes) return new ValidationResult("слишком длинный текст");
       }
 
       return ValidationResult.Success;
