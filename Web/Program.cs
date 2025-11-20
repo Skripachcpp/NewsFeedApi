@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using Web.Application;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +88,9 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+// метрики
+app.MapMetrics("/metrics");
+
 // отчитываемся о том что живы здоровы
 app.MapHealthChecks("/health");
 app.MapHealthChecks("/health/ready", new HealthCheckOptions {
@@ -126,6 +130,9 @@ app.UseCors();
 
 // кастомный обработчик ошибок
 app.UseExceptionHandler();
+
+// prometheus HTTP метрики
+app.UseHttpMetrics();
 
 app.UseAuthentication();
 app.UseAuthorization();
