@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Domain.DTOs;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -29,12 +30,17 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   public async Task<ActionResult<NewsArticleDto>> CreateArticle(
     [FromBody] ArticleCreateRequest article
     ) {
+    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    var userName = User.FindFirst(ClaimTypes.Name)!.Value;
+    
     var newsArticleCreateDto = new NewsArticleCreateDto {
       Title = article.Title,
       Content = article.Content,
       Summary = article.Summary,
       Tags = article.Tags,
       PublicationDate = DateTime.UtcNow,
+      UserId = userId,
+      UserName = userName
     };
     
     var result = await newsRepository.CreateArticleAsync(newsArticleCreateDto);
