@@ -213,7 +213,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
 
   public async Task<bool> DeleteArticleAsync(int id, CancellationToken cancellationToken = default) {
     // language=PostgreSQL
-    var rowsAffected = await dpContext.ExecuteWithTransactionAsync(
+    var rowsAffected = await dpContext.ExecuteAsync(
       @"DELETE FROM news_article WHERE id = @Id",
       parameters: new { Id = id },
       cancellationToken: cancellationToken

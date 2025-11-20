@@ -18,7 +18,7 @@ public class TagsRepository(DpContext dpContext) : ITagsRepository {
 
   public async Task DeleteTag(int id, CancellationToken cancellationToken = default) {
     // language=PostgreSQL
-    await dpContext.ExecuteWithTransactionAsync(
+    await dpContext.ExecuteAsync(
       @"DELETE FROM tag WHERE id = @Id",
       parameters: new { Id = id },
       cancellationToken: cancellationToken

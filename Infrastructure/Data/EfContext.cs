@@ -4,8 +4,8 @@ namespace Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 public class EfContext(DbContextOptions<EfContext> options): DbContext(options) {
-  public DbSet<NewsArticle> NewsArticles { get; set; }
-  public DbSet<Tag> Tags { get; set; }
+  public DbSet<NewsArticle> NewsArticles { get; init; }
+  public DbSet<Tag> Tags { get; init; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     modelBuilder.Entity<NewsArticle>(entity => {

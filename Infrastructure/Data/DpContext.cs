@@ -14,6 +14,18 @@ public class DpContext(string connectionString) {
 
     return connection;
   }
+  
+  public async Task<int> ExecuteAsync(string sql, CancellationToken cancellationToken = default, object? parameters = default) {
+    using var connection = OpenConnection();
+
+    var result = await connection.ExecuteAsync(new CommandDefinition(
+      sql,
+      parameters: parameters,
+      cancellationToken: cancellationToken
+    ));
+
+    return result;
+  }
 
   public async Task<IEnumerable<T>> QueryAsync<T>(string sql, CancellationToken cancellationToken = default, object? parameters = default) {
     using var connection = OpenConnection();
@@ -29,100 +41,81 @@ public class DpContext(string connectionString) {
   
   public async Task<T?> QueryFirstOrDefaultAsync<T>(string sql, CancellationToken cancellationToken = default, object? parameters = default) {
     using var connection = OpenConnection();
-
+    
     var result = await connection.QueryFirstOrDefaultAsync<T>(new CommandDefinition(
       sql,
       parameters: parameters,
       cancellationToken: cancellationToken
     ));
-
+    
     return result;
+  }
+  
+  private async Task<T> RunInTransaction<T>(Func<IDbConnection, IDbTransaction, Task<T>> func) {
+    using var connection = OpenConnection();
+    var transaction = connection.BeginTransaction();
+
+    try {
+      var result = await func(connection, transaction);
+      
+      transaction.Commit();
+
+      return result;
+    }
+    catch {
+      transaction.Rollback();
+      throw;
+    }
   }
   
   public async Task<T> QuerySingleWithTransactionAsync<T>(string sql,
     CancellationToken cancellationToken = default, object? parameters = default) {
-    using var connection = OpenConnection();
-    var transaction = connection.BeginTransaction();
-
-    try {
-      var result = await connection.QuerySingleAsync<T>(new CommandDefinition(
+    var result = await RunInTransaction<T>(async (connection, transaction) => (
+      await connection.QuerySingleAsync<T>(new CommandDefinition(
         sql,
         parameters: parameters,
         transaction: transaction,
         cancellationToken: cancellationToken
-      ));
+      ))));
 
-      transaction.Commit();
-      return result;
-    }
-    catch {
-      transaction.Rollback();
-      throw;
-    }
+    return result;
   }
   
   public async Task<T?> QuerySingleOrDefaultWithTransactionAsync<T>(string sql,
     CancellationToken cancellationToken = default, object? parameters = default) {
-    using var connection = OpenConnection();
-    var transaction = connection.BeginTransaction();
-
-    try {
-      var result = await connection.QuerySingleOrDefaultAsync<T>(new CommandDefinition(
+    var result = await RunInTransaction<T?>(async (connection, transaction) => (
+      await connection.QuerySingleOrDefaultAsync<T>(new CommandDefinition(
         sql,
         parameters: parameters,
         transaction: transaction,
         cancellationToken: cancellationToken
-      ));
+      ))));
 
-      transaction.Commit();
-      return result;
-    }
-    catch {
-      transaction.Rollback();
-      throw;
-    }
+    return result;
   }
 
   public async Task<IEnumerable<T>> QueryWithTransactionAsync<T>(string sql,
     CancellationToken cancellationToken = default, object? parameters = default) {
-    using var connection = OpenConnection();
-    var transaction = connection.BeginTransaction();
-
-    try {
-      var result = await connection.QueryAsync<T>(new CommandDefinition(
+    var result = await RunInTransaction<IEnumerable<T>>(async (connection, transaction) => (
+      await connection.QueryAsync<T>(new CommandDefinition(
         sql,
         parameters: parameters,
         transaction: transaction,
         cancellationToken: cancellationToken
-      ));
+      ))));
 
-      transaction.Commit();
-      return result;
-    }
-    catch {
-      transaction.Rollback();
-      throw;
-    }
+    return result;
   }
 
   public async Task<int> ExecuteWithTransactionAsync(string sql, CancellationToken cancellationToken = default, object? parameters = default) {
-    using var connection = OpenConnection();
-    var transaction = connection.BeginTransaction();
-
-    try {
-      var rowsAffected = await connection.ExecuteAsync(new CommandDefinition(
+    var result = await RunInTransaction<int>(async (connection, transaction) => (
+      await connection.ExecuteAsync(new CommandDefinition(
         sql,
         parameters: parameters,
         transaction: transaction,
         cancellationToken: cancellationToken
-      ));
-      transaction.Commit();
+      ))));
 
-      return rowsAffected;
-    }
-    catch {
-      transaction.Rollback();
-      throw;
-    }
+    return result;
   }
 }

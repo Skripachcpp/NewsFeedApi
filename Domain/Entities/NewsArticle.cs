@@ -1,24 +1,11 @@
 namespace Domain.Entities;
 
 public sealed class NewsArticle {
-  // id
-  public int Id { get; set; }
-  
-  // заголовок
-  public required string Title { get; set; }
-  
-  // контент
-  public required string Content { get; set; }
-  
-  // описание
-  public string? Summary { get; set; }
-  
-  // дата публикации
-  public DateTime PublicationDate { get; set; }
-
-  // создатель
-  public int? UserId { get; set; }
-  
-  // имя создателя
-  public string? UserName { get; set; }
+  public int Id { get; init; }
+  public required string Title { get; init; }
+  public required string Content { get; init; }
+  public string? Summary { get; init; }
+  public DateTime PublicationDate { get; init; }
+  public int? UserId { get; init; }
+  public string? UserName { get; init; }
 }
