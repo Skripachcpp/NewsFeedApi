@@ -7,8 +7,9 @@ namespace Infrastructure;
 
 public class TagsRepository(DpContext dpContext) : ITagsRepository {
   public async Task<IEnumerable<TagDto>> GetTags(CancellationToken cancellationToken = default) {
+    // каскадное удаление, тут нужна транзакция
     // language=PostgreSQL
-    var result = await dpContext.QueryAsync<TagDto>(
+    var result = await dpContext.QueryWithTransactionAsync<TagDto>(
       @"SELECT id as Id, name as Name FROM tag",
       cancellationToken: cancellationToken
     );

@@ -30,16 +30,16 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   public async Task<ActionResult<NewsArticleDto>> CreateArticle(
     [FromBody] ArticleCreateRequest article
     ) {
-    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-    var userName = User.FindFirst(ClaimTypes.Name)!.Value;
+    var userInfo = GetUserInfo();
+    if (userInfo == null) return BadRequest("не удалось получить данные о пользователе");
     
     var result = await newsRepository.CreateArticleAsync(new NewsArticleCreateDto {
       Title = article.Title,
       Content = article.Content,
       Summary = article.Summary,
       Tags = article.Tags,
-      UserId = userId,
-      UserName = userName
+      UserId = userInfo.Id,
+      UserName = userInfo.Name
     });
     
     return OkResult(result);
@@ -50,8 +50,8 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   public async Task<ActionResult<NewsArticleDto>> UpdateArticle(
     [FromBody] ArticleUpdateRequest article
   ) {
-    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-    var userName = User.FindFirst(ClaimTypes.Name)!.Value;
+    var userInfo = GetUserInfo();
+    if (userInfo == null) return BadRequest("не удалось получить данные о пользователе");
     
     var result = await newsRepository.UpdateArticleAsync(new NewsArticleUpdateDto {
       Id = article.Id,
@@ -59,8 +59,8 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
       Content = article.Content,
       Summary = article.Summary,
       Tags = article.Tags,
-      UserName = userName,
-      UserId = userId // теперь это его статья
+      UserId = userInfo.Id, // теперь это его статья
+      UserName = userInfo.Name
     });
     
     if (result == null) return NotFound("Статья не найдена");
