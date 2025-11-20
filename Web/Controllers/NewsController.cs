@@ -13,22 +13,23 @@ namespace Web.Controllers;
 [Route("[controller]")]
 public class NewsController(INewsRepository newsRepository) : BaseController {
   [HttpGet("/v1/article/{id}")]
-  public async Task<ActionResult<NewsArticleDto>> GetArticle(int id) {
-    var result = await newsRepository.GetArticleAsync(id);
+  public async Task<ActionResult<NewsArticleDto>> GetArticle(int id, CancellationToken cancellationToken = default) {
+    var result = await newsRepository.GetArticleAsync(id, cancellationToken);
     if (result == null) return NotFound("Статья не найдена");
     return OkResult(result);
   }
   
   [HttpGet("/v1/articles")]
-  public async Task<ActionResult<IEnumerable<NewsArticleDto>>> GetArticles() {
-    var result = await newsRepository.GetArticlesAsync();
+  public async Task<ActionResult<IEnumerable<NewsArticleDto>>> GetArticles(CancellationToken cancellationToken = default) {
+    var result = await newsRepository.GetArticlesAsync(cancellationToken);
     return OkResult(result);
   }
   
   [Authorize]
   [HttpPost("/v1/article")]
   public async Task<ActionResult<NewsArticleDto>> CreateArticle(
-    [FromBody] ArticleCreateRequest article
+    [FromBody] ArticleCreateRequest article,
+    CancellationToken cancellationToken = default
     ) {
     var userInfo = GetUserInfo();
     if (userInfo == null) return BadRequest("не удалось получить данные о пользователе");
@@ -40,7 +41,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
       Tags = article.Tags,
       UserId = userInfo.Id,
       UserName = userInfo.Name
-    });
+    }, cancellationToken);
     
     return OkResult(result);
   }
@@ -48,7 +49,8 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   [Authorize]
   [HttpPatch("/v1/article")]
   public async Task<ActionResult<NewsArticleDto>> UpdateArticle(
-    [FromBody] ArticleUpdateRequest article
+    [FromBody] ArticleUpdateRequest article,
+    CancellationToken cancellationToken = default
   ) {
     var userInfo = GetUserInfo();
     if (userInfo == null) return BadRequest("не удалось получить данные о пользователе");
@@ -61,7 +63,7 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
       Tags = article.Tags,
       UserId = userInfo.Id, // теперь это его статья
       UserName = userInfo.Name
-    });
+    }, cancellationToken);
     
     if (result == null) return NotFound("Статья не найдена");
     
@@ -71,9 +73,10 @@ public class NewsController(INewsRepository newsRepository) : BaseController {
   [Authorize]
   [HttpDelete("/v1/article/{id}")]
   public async Task<ActionResult> DeleteArticle(
-    int id
+    int id,
+    CancellationToken cancellationToken = default
   ) {
-    var success = await newsRepository.DeleteArticleAsync(id);
+    var success = await newsRepository.DeleteArticleAsync(id, cancellationToken);
     if (success == false) return NotFound("Статья не найдена");
     
     return Ok();
