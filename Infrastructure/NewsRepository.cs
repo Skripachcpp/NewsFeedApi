@@ -60,7 +60,7 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         ORDER BY na.publication_date DESC
       ",
         // language=PostgreSQL
-        @"SELECT COUNT(id) as cnt FROM news_article",
+        @"SELECT COUNT(*) as cnt FROM news_article",
         parameters: new {  Count = count, Offset = offset },
         cancellationToken: cancellationToken
     );
