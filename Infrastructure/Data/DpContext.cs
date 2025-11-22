@@ -19,7 +19,7 @@ public class DpContext(string connectionString) {
 
   public async Task<PageDto<T>> PageAsync<T>(
     string sql, 
-    string sqt, 
+    string? sqt = default, 
     CancellationToken cancellationToken = default,
     object? parameters = default,
     int offset = 0, 
@@ -36,11 +36,11 @@ public class DpContext(string connectionString) {
     
     if (!dict.ContainsKey("Offset")) dict.Add("Offset", offset);
     if (!dict.ContainsKey("Count")) dict.Add("Count", count);
-    
+
     var multiple = await connection.QueryMultipleAsync(new CommandDefinition(
       @$"
         {sql}
-        LIMIT @Count OFFSET @Offset;
+        {(sqt == null ? "" : "LIMIT @Count OFFSET @Offset;")}
         {sqt}
       ",
       parameters: parametersExpando,

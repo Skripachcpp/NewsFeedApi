@@ -35,14 +35,32 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   ) {
     using var connection = dpContext.OpenConnection();
     var page = await dpContext.PageAsync<NewsArticleDto>(
-        // language=PostgreSQL
-        $@"
-          {BaseSelectQuerySelect}
-          {BaseSelectQueryEnding}
-        ",
-        // language=PostgreSQL
-        @"SELECT COUNT(id) as cnt FROM news_article",
-        cancellationToken: cancellationToken
+      // language=PostgreSQL
+      $@"
+        SELECT
+          na.id as Id,
+          na.title as Title,
+          na.content as Content,
+          na.summary as Summary,
+          na.publication_date as PublicationDate,
+          na.user_name as UserName,
+          COALESCE(
+            (SELECT array_agg(t.name ORDER BY t.name)
+             FROM news_article_tag nat
+             INNER JOIN tag t ON nat.tag_id = t.id
+             WHERE nat.news_article_id = na.id),
+            ARRAY[]::text[]
+          ) as Tags
+        FROM (
+          SELECT id, title, content, summary, publication_date, user_name
+          FROM news_article
+          ORDER BY publication_date DESC
+          LIMIT @Count OFFSET @Offset
+        ) na
+        ORDER BY na.publication_date DESC
+      ",
+      parameters: new { Count = count, Offset = offset },
+      cancellationToken: cancellationToken
     );
     return page;
   }
