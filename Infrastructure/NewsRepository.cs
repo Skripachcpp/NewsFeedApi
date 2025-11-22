@@ -35,8 +35,8 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
   ) {
     using var connection = dpContext.OpenConnection();
     var page = await dpContext.PageAsync<NewsArticleDto>(
-      // language=PostgreSQL
-      $@"
+        // language=PostgreSQL
+        $@"
         SELECT
           na.id as Id,
           na.title as Title,
@@ -59,8 +59,10 @@ public class NewsRepository(DpContext dpContext) : INewsRepository {
         ) na
         ORDER BY na.publication_date DESC
       ",
-      parameters: new { Count = count, Offset = offset },
-      cancellationToken: cancellationToken
+        // language=PostgreSQL
+        @"SELECT COUNT(id) as cnt FROM news_article",
+        parameters: new {  Count = count, Offset = offset },
+        cancellationToken: cancellationToken
     );
     return page;
   }
