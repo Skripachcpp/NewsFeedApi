@@ -80,7 +80,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddControllers();
 
-// Настройка Swagger/OpenAPI
+// swagger
 builder.Services.AddOpenApiDocument(settings =>
 {
     settings.Title = "NewsFeed API"; 
