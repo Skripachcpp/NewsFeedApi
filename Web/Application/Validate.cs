@@ -42,7 +42,7 @@ internal sealed class Validate(): ValidationAttribute
             return ValidationResult.Success;
         }
 
-        if (value is string[] textArray)
+        if (value is ICollection<string> textArray)
         {
             if (this.Min != int.MinValue && textArray.Any(it => it.Length < this.Min))
                 return new ValidationResult(this.MessageString);
@@ -51,7 +51,7 @@ internal sealed class Validate(): ValidationAttribute
                 return new ValidationResult(this.MessageString);
 
             // в массиве должно что то быть иначе какой он обязательный
-            if (this.Required && textArray.Length <= 0)
+            if (this.Required && textArray.Count <= 0)
                 return new ValidationResult(this.MessageString);
 
             return ValidationResult.Success;
