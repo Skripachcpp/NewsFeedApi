@@ -87,8 +87,6 @@ builder.Services.AddOpenApiDocument(settings =>
     settings.Description = "API для работы с новостной лентой";
 });
 
-builder.Services.AddOpenApi();
-
 // кастомный обработчик ошибок
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
