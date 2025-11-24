@@ -6,10 +6,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -23,7 +21,7 @@ namespace Infrastructure.Migrations
                     summary = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     publication_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: true),
-                    user_name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true)
+                    user_name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                 },
                 constraints: table =>
                 {
@@ -36,7 +34,7 @@ namespace Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -48,7 +46,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     news_article_id = table.Column<int>(type: "integer", nullable: false),
-                    tag_id = table.Column<int>(type: "integer", nullable: false)
+                    tag_id = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -101,9 +99,10 @@ namespace Infrastructure.Migrations
                 unique: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            if (migrationBuilder == null) return;
+
             migrationBuilder.DropTable(
                 name: "news_article_tag");
 

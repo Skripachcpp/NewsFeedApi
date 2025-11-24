@@ -4,24 +4,27 @@ using Infrastructure.Data;
 
 namespace Infrastructure;
 
-public class TagsRepository(DpContext dpContext) : ITagsRepository {
-  public async Task<IEnumerable<TagDto>> GetTags(CancellationToken cancellationToken = default) {
-    // language=PostgreSQL
-    var result = await dpContext.QueryAsync<TagDto>(
-      @"SELECT id as Id, name as Name FROM tag",
-      cancellationToken: cancellationToken
-    );
+public class TagsRepository(DpContext dpContext): ITagsRepository
+{
+    /// <inheritdoc/>
+    public async Task<IEnumerable<TagDto>> GetTags(CancellationToken cancellationToken = default)
+    {
+        // language=PostgreSQL
+        var result = await dpContext.QueryAsync<TagDto>(
+            @"SELECT id as Id, name as Name FROM tag",
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
-    return result;
-  }
+        return result;
+    }
 
-  public async Task DeleteTag(int id, CancellationToken cancellationToken = default) {
-    // каскадное удаление, тут нужна транзакция
-    // language=PostgreSQL
-    await dpContext.ExecuteWithTransactionAsync(
-      @"DELETE FROM tag WHERE id = @Id",
-      parameters: new { Id = id },
-      cancellationToken: cancellationToken
-    );
-  }
+    /// <inheritdoc/>
+    public async Task DeleteTag(int id, CancellationToken cancellationToken = default)
+    {
+        // каскадное удаление, тут нужна транзакция
+        // language=PostgreSQL
+        await dpContext.ExecuteWithTransactionAsync(
+            @"DELETE FROM tag WHERE id = @Id",
+            parameters: new { Id = id },
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
 }
