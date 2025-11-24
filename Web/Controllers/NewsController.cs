@@ -13,8 +13,6 @@ public sealed class NewsController(
     INewsRepository newsRepository,
     ICacheRepository cacheRepository): BaseController
 {
-    private const string CacheKeyArticles = "articles";
-
     [HttpGet("article/{id}")]
     public async Task<ActionResult<NewsArticleDto>> GetArticle(int id, CancellationToken cancellationToken = default)
     {
@@ -36,7 +34,7 @@ public sealed class NewsController(
 
         // ну не знаю, глаза ломаются, возможно если управлять кешем вручную это будет легче читаться
         var page = await cacheRepository.AutoCacheAsync(
-            CacheKeyArticles,
+            CacheKeys.Articles,
             [offset.ToStr(), count.ToStr()],
             async () => await newsRepository.GetArticlesAsync(offset, count, cancellationToken)
                 .ConfigureAwait(false)).ConfigureAwait(false);
@@ -64,7 +62,7 @@ public sealed class NewsController(
                 UserName = userInfo.name,
             }, cancellationToken).ConfigureAwait(false);
 
-        await cacheRepository.Clear(CacheKeyArticles).ConfigureAwait(false);
+        await cacheRepository.Clear(CacheKeys.Articles).ConfigureAwait(false);
         return result;
     }
 
@@ -91,7 +89,7 @@ public sealed class NewsController(
 
         if (result == null) return this.NotFound("статья не найдена");
 
-        await cacheRepository.Clear(CacheKeyArticles).ConfigureAwait(false);
+        await cacheRepository.Clear(CacheKeys.Articles).ConfigureAwait(false);
         return result;
     }
 
@@ -104,7 +102,7 @@ public sealed class NewsController(
         var success = await newsRepository.DeleteArticleAsync(id, cancellationToken).ConfigureAwait(false);
         if (success == false) return this.NotFound("статья не найдена");
 
-        await cacheRepository.Clear(CacheKeyArticles).ConfigureAwait(false);
+        await cacheRepository.Clear(CacheKeys.Articles).ConfigureAwait(false);
         return this.Ok();
     }
 }
