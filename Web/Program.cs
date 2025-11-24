@@ -137,11 +137,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.Urls.Add("http://localhost:5058");
-}
-
 // свагер пусть будет и в продакшене
 app.UseOpenApi();
 app.UseSwaggerUi();
@@ -161,4 +156,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await app.RunAsync();
+await app.StartAsync();
+
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Swagger UI доступен по адресу: {SwaggerUrl}", $"{app.Urls.FirstOrDefault()}/swagger");
+}
+
+await app.WaitForShutdownAsync();

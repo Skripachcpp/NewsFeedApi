@@ -269,6 +269,9 @@ dotnet_diagnostic.SA1503.severity = none
 # SA1515: Single-line comment should be preceded by blank line
 dotnet_diagnostic.SA1515.severity = none
 
+# SA1509: Opening braces should not be preceded by blank line
+dotnet_diagnostic.SA1509.severity = none
+
 # SA1028: Code should not contain trailing whitespace
 dotnet_diagnostic.SA1028.severity = none
 
