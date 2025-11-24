@@ -8,12 +8,11 @@ namespace Infrastructure.Data;
 
 public class DpContext(string connectionString)
 {
-    private readonly string connectionString =
-        connectionString ?? throw new ArgumentNullException(nameof(connectionString));
-
     public IDbConnection OpenConnection()
     {
-        var connection = new NpgsqlConnection(this.connectionString);
+        if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
+
+        var connection = new NpgsqlConnection(connectionString);
         connection.Open();
 
         return connection;
@@ -39,15 +38,8 @@ public class DpContext(string connectionString)
             }
         }
 
-        if (!dict.ContainsKey("Offset"))
-        {
-            dict.Add("Offset", offset);
-        }
-
-        if (!dict.ContainsKey("Count"))
-        {
-            dict.Add("Count", count);
-        }
+        if (!dict.ContainsKey("Offset")) dict.Add("Offset", offset);
+        if (!dict.ContainsKey("Count")) dict.Add("Count", count);
 
         var multiple = await connection.QueryMultipleAsync(new CommandDefinition(
             @$"

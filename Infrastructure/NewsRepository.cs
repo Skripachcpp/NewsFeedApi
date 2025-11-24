@@ -28,7 +28,6 @@ public class NewsRepository(DpContext dpContext): INewsRepository
       ORDER BY na.publication_date DESC
       ";
 
-    /// <inheritdoc/>
     public async Task<PageDto<NewsArticleDto>> GetArticlesAsync(int offset = 0, int count = 100, CancellationToken cancellationToken = default)
     {
         using var connection = dpContext.OpenConnection();
@@ -84,7 +83,6 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         return result;
     }
 
-    /// <inheritdoc/>
     public async Task<NewsArticleDto?> GetArticleAsync(int id, CancellationToken cancellationToken = default)
     {
         using var connection = dpContext.OpenConnection();
@@ -134,7 +132,6 @@ public class NewsRepository(DpContext dpContext): INewsRepository
             transaction: transaction)).ConfigureAwait(false);
     }
 
-    /// <inheritdoc/>
     public async Task<NewsArticleDto> CreateArticleAsync(
         NewsArticleCreateDto article,
         CancellationToken cancellationToken = default)
@@ -189,7 +186,6 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         }
     }
 
-    /// <inheritdoc/>
     public async Task<NewsArticleDto?> UpdateArticleAsync(
         NewsArticleUpdateDto article,
         CancellationToken cancellationToken = default)
@@ -258,7 +254,6 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         }
     }
 
-    /// <inheritdoc/>
     public async Task<bool> DeleteArticleAsync(int id, CancellationToken cancellationToken = default)
     {
         // каскадное удаление
