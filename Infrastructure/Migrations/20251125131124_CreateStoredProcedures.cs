@@ -15,15 +15,15 @@ CREATE OR REPLACE FUNCTION get_articles_paged(
     p_offset INTEGER DEFAULT 0,
     p_count INTEGER DEFAULT 100
 )
-    RETURNS TABLE (
-                      id INTEGER,
-                      title CHARACTER VARYING(500),
-                      content TEXT,
-                      summary CHARACTER VARYING(1000),
-                      publication_date TIMESTAMP WITH TIME ZONE,
-                      user_name CHARACTER VARYING(200),
-                      tags TEXT[]
-                  ) AS $$
+RETURNS TABLE (
+  id INTEGER,
+  title CHARACTER VARYING(500),
+  content TEXT,
+  summary CHARACTER VARYING(1000),
+  publication_date TIMESTAMP WITH TIME ZONE,
+  user_name CHARACTER VARYING(200),
+  tags TEXT[]
+) AS $$
 BEGIN
     RETURN QUERY
         SELECT

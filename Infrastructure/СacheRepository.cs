@@ -85,27 +85,33 @@ public class CacheRepository(
     {
         var instanceName = redisOptions.Value.InstanceName;
         var redisConnection = connectionMultiplexer.Value;
-
         var database = redisConnection.GetDatabase();
-        var server = redisConnection.GetServer(redisConnection.GetEndPoints().First());
 
-        var keysToDelete = new List<RedisKey>();
+        var pattern = instanceName + keyPart + "*";
 
-        // удаляем ключи кусками // можно вообще на Lua скрипт перейти но это будет уже перебор для пет проекта
-        await foreach (var key in server.KeysAsync(pattern: instanceName + keyPart + "*", pageSize: 100, pageOffset: 0).ConfigureAwait(false))
-        {
-            keysToDelete.Add(key);
-
-            if (keysToDelete.Count >= 100)
-            {
-                await database.KeyDeleteAsync(keysToDelete.ToArray()).ConfigureAwait(false);
-                keysToDelete.Clear();
-            }
-        }
-
-        if (keysToDelete.Count > 0)
-        {
-            await database.KeyDeleteAsync(keysToDelete.ToArray()).ConfigureAwait(false);
-        }
+        await database.ScriptEvaluateAsync(
+            @"
+                local pattern = ARGV[1]
+                local deleted = 0
+                local cursor = '0'
+                local maxIterations = 1000
+                
+                repeat
+                    local result = redis.call('SCAN', cursor, 'MATCH', pattern, 'COUNT', 100)
+                    cursor = result[1]
+                    local keys = result[2]
+                    
+                    if #keys > 0 then
+                        deleted = deleted + redis.call('DEL', unpack(keys))
+                    end
+                    
+                    maxIterations = maxIterations - 1
+                until cursor == '0' or maxIterations <= 0
+                
+                return deleted
+            ",
+            keys: Array.Empty<RedisKey>(),
+            values: new[] { (RedisValue)pattern })
+        .ConfigureAwait(false);
     }
 }
