@@ -2,6 +2,7 @@ using System.Data;
 using System.Text;
 using Domain.Interfaces;
 using Infrastructure;
+using Infrastructure.Configuration;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -33,9 +34,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddScoped<ITagsRepository, TagsRepository>();
-builder.Services.AddScoped<INewsRepository, NewsRepository>();
-builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+builder.Services.AddConfiguration();
 
 // redis _
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
