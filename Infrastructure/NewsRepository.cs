@@ -28,40 +28,19 @@ public class NewsRepository(DpContext dpContext): INewsRepository
       ORDER BY na.publication_date DESC
       ";
 
+    /// <inheritdoc/>
     public async Task<PageDto<NewsArticleDto>> GetArticlesAsync(int offset = 0, int count = 100, CancellationToken cancellationToken = default)
     {
         using var connection = dpContext.OpenConnection();
 
         // language=PostgreSQL
         var page = await dpContext.PageAsync<NewsArticleDto>(
-            $@"
-                SELECT
-                  na.id as Id,
-                  na.title as Title,
-                  na.content as Content,
-                  na.summary as Summary,
-                  na.publication_date as PublicationDate,
-                  na.user_name as UserName,
-                  COALESCE(
-                    (SELECT array_agg(t.name ORDER BY t.name)
-                     FROM news_article_tag nat
-                     INNER JOIN tag t ON nat.tag_id = t.id
-                     WHERE nat.news_article_id = na.id),
-                    ARRAY[]::text[]
-                  ) as Tags
-                FROM (
-                  SELECT id, title, content, summary, publication_date, user_name
-                  FROM news_article
-                  ORDER BY publication_date DESC
-                  LIMIT @Count OFFSET @Offset
-                ) na
-                ORDER BY na.publication_date DESC
-              ",
-
-            // language=PostgreSQL
-            @"SELECT COUNT(*) as cnt FROM news_article",
-            parameters: new { Count = count, Offset = offset },
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+        $@"
+                SELECT * FROM get_articles_paged(@Offset, @Count);
+                SELECT get_articles_count() as cnt;
+            ",
+        parameters: new { Count = count, Offset = offset },
+        cancellationToken: cancellationToken).ConfigureAwait(false);
         return page;
     }
 
@@ -83,6 +62,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         return result;
     }
 
+    /// <inheritdoc/>
     public async Task<NewsArticleDto?> GetArticleAsync(int id, CancellationToken cancellationToken = default)
     {
         using var connection = dpContext.OpenConnection();
@@ -132,6 +112,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
             transaction: transaction)).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task<NewsArticleDto> CreateArticleAsync(
         NewsArticleCreateDto article,
         CancellationToken cancellationToken = default)
@@ -186,6 +167,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         }
     }
 
+    /// <inheritdoc/>
     public async Task<NewsArticleDto?> UpdateArticleAsync(
         NewsArticleUpdateDto article,
         CancellationToken cancellationToken = default)
@@ -254,6 +236,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         }
     }
 
+    /// <inheritdoc/>
     public async Task<bool> DeleteArticleAsync(int id, CancellationToken cancellationToken = default)
     {
         // каскадное удаление

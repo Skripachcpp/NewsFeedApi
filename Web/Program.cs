@@ -82,7 +82,7 @@ builder.Services.AddControllers();
 // swagger
 builder.Services.AddOpenApiDocument(settings =>
 {
-    settings.Title = "NewsFeed API"; 
+    settings.Title = "NewsFeed API";
     settings.Description = "API для работы с новостной лентой";
 });
 

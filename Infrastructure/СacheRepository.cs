@@ -17,6 +17,7 @@ public class CacheRepository(
         return $"{keyPart}_{string.Join("_", values)}";
     }
 
+    /// <inheritdoc/>
     public async Task<T> AutoCacheAsync<T>(string keyPart, string?[] values, Func<Task<T>> getValue)
     {
         if (getValue == null) throw new ArgumentNullException(nameof(getValue));
@@ -32,6 +33,7 @@ public class CacheRepository(
         return await this.SetAsync(keyPart, values, value).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task<T?> GetAsync<T>(string keyPart, string?[] values)
     {
         var cacheKey = this.GetKey(keyPart, values);
@@ -55,12 +57,14 @@ public class CacheRepository(
         return default;
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<T>> SetAsync<T>(string keyPart, string?[] values, IEnumerable<T> value)
     {
         var valueList = value.ToList();
         return await this.SetAsync(keyPart, values, valueList).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task<T> SetAsync<T>(string keyPart, string?[] values, T value)
     {
         var cacheKey = this.GetKey(keyPart, values);
@@ -76,6 +80,7 @@ public class CacheRepository(
         return value;
     }
 
+    /// <inheritdoc/>
     public async Task Clear(string keyPart)
     {
         var instanceName = redisOptions.Value.InstanceName;

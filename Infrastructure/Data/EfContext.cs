@@ -9,6 +9,7 @@ public class EfContext(DbContextOptions<EfContext> options): DbContext(options)
     public DbSet<NewsArticle>? NewsArticles { get; init; }
     public DbSet<Tag>? Tags { get; init; }
 
+    /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         if (modelBuilder == null) throw new ArgumentNullException(nameof(modelBuilder));

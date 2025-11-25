@@ -8,7 +8,7 @@ static public class IntExtensions
     {
         return value.ToString(CultureInfo.InvariantCulture);
     }
-    
+
     static public int TryPrs(this string? value, int dflt = -1)
     {
         var success = int.TryParse(value, CultureInfo.InvariantCulture, out var valueInt);

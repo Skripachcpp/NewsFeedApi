@@ -22,7 +22,7 @@ public sealed class TagsController(ICacheRepository cacheRepository, ITagsReposi
     public async Task<ActionResult> DeleteTag(int id, CancellationToken cancellationToken = default)
     {
         await tagsRepository.DeleteTag(id, cancellationToken).ConfigureAwait(false);
-        
+
         await cacheRepository.Clear(CacheKeys.Articles);
         return this.Ok();
     }

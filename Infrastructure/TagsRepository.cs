@@ -6,6 +6,7 @@ namespace Infrastructure;
 
 public class TagsRepository(DpContext dpContext): ITagsRepository
 {
+    /// <inheritdoc/>
     public async Task<IEnumerable<TagDto>> GetTags(CancellationToken cancellationToken = default)
     {
         // language=PostgreSQL
@@ -16,6 +17,7 @@ public class TagsRepository(DpContext dpContext): ITagsRepository
         return result;
     }
 
+    /// <inheritdoc/>
     public async Task DeleteTag(int id, CancellationToken cancellationToken = default)
     {
         // каскадное удаление, тут нужна транзакция

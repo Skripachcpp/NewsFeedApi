@@ -11,3 +11,12 @@ docker run -d \
   --name newsfeed-api \
   newsfeed-api
 ```
+
+# создать миграцию
+dotnet ef migrations add <ИмяМиграции> --project Infrastructure --startup-project Web
+
+# откатить 1 миграцию назад
+dotnet ef database update InitialCreate --project Infrastructure --startup-project Web
+
+# автоисправление ошибок
+dotnet format    

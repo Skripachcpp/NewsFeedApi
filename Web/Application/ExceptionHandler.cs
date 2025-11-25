@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 internal sealed class ExceptionHandler(IProblemDetailsService problemDetailsService, ILogger<ExceptionHandler> logger): IExceptionHandler
 {
+    /// <inheritdoc/>
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         logger.LogError(exception, exception.Message);

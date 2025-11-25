@@ -15,6 +15,7 @@ internal sealed class Validate(): ValidationAttribute
 
     private string? MessageString => this.ErrorMessage ?? $"{(this.Required ? "обязательно, " : string.Empty)}должно содержать {(this.Min != int.MinValue ? $"от {this.Min} " : string.Empty)}{(this.Max != int.MinValue ? $"до {this.Max} " : string.Empty)}символ(ов)";
 
+    /// <inheritdoc/>
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
         if (this.Required && value == null)

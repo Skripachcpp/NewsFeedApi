@@ -12,5 +12,5 @@ static public class Di
         services.AddScoped<ICacheRepository, CacheRepository>();
 
         return services;
-    } 
+    }
 }
