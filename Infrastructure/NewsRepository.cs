@@ -8,26 +8,6 @@ namespace Infrastructure;
 
 public class NewsRepository(DpContext dpContext): INewsRepository
 {
-    // language=PostgreSQL
-    private const string BaseSelectQuerySelect = @"
-       SELECT
-        na.id as Id,
-        na.title as Title,
-        na.content as Content,
-        na.summary as Summary,
-        na.publication_date as PublicationDate,
-        na.user_name as UserName,
-        COALESCE(array_agg(t.name) FILTER (WHERE t.name IS NOT NULL), ARRAY[]::text[]) as Tags
-      FROM news_article na 
-      LEFT JOIN news_article_tag nat ON na.id = nat.news_article_id
-      LEFT JOIN tag t ON nat.tag_id = t.id
-      ";
-
-    private const string BaseSelectQueryEnding = @"
-      GROUP BY na.id, na.title, na.content, na.summary, na.publication_date, na.user_name
-      ORDER BY na.publication_date DESC
-      ";
-
     /// <inheritdoc/>
     public async Task<PageDto<NewsArticleDto>> GetArticlesAsync(int offset = 0, int count = 100, CancellationToken cancellationToken = default)
     {
@@ -35,12 +15,12 @@ public class NewsRepository(DpContext dpContext): INewsRepository
 
         // language=PostgreSQL
         var page = await dpContext.PageAsync<NewsArticleDto>(
-        $@"
-                SELECT * FROM get_articles_paged(@Offset, @Count);
-                SELECT get_articles_count() as cnt;
-            ",
-        parameters: new { Count = count, Offset = offset },
-        cancellationToken: cancellationToken).ConfigureAwait(false);
+            $@"
+            SELECT * FROM get_articles_paged(@Offset, @Count);
+            SELECT get_articles_count() as cnt;
+        ",
+            parameters: new { Count = count, Offset = offset },
+            cancellationToken: cancellationToken).ConfigureAwait(false);
         return page;
     }
 
@@ -52,9 +32,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
     {
         // language=PostgreSQL
         var result = await connection.QueryFirstOrDefaultAsync<NewsArticleDto>(new CommandDefinition(
-            $@"{BaseSelectQuerySelect}
-        WHERE na.id = @Id
-        {BaseSelectQueryEnding}",
+            $@"SELECT * FROM get_articles_paged(news_article_id := @Id)",
             parameters: new { Id = id },
             cancellationToken: cancellationToken,
             transaction: transaction)).ConfigureAwait(false);
@@ -182,16 +160,16 @@ public class NewsRepository(DpContext dpContext): INewsRepository
             // language=PostgreSQL
             var articleId = await connection.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
                 @"
-        UPDATE news_article
-        SET title = @Title,
-            content = @Content,
-            summary = @Summary,
-            publication_date = @PublicationDate,
-            user_id = @UserId,
-            user_name = @UserName
-        WHERE id = @Id
-        RETURNING id
-        ",
+                UPDATE news_article
+                SET title = @Title,
+                    content = @Content,
+                    summary = @Summary,
+                    publication_date = @PublicationDate,
+                    user_id = @UserId,
+                    user_name = @UserName
+                WHERE id = @Id
+                RETURNING id
+                ",
                 parameters: new
                 {
                     Id = article.Id,

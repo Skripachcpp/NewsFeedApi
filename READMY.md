@@ -13,7 +13,7 @@ docker run -d \
 ```
 
 # создать миграцию
-dotnet ef migrations add <ИмяМиграции> --project Infrastructure --startup-project Web
+dotnet ef migrations add CreateStoredProcedures --project Infrastructure --startup-project Web
 
 # откатить 1 миграцию назад
 dotnet ef database update InitialCreate --project Infrastructure --startup-project Web
