@@ -20,14 +20,14 @@ public class CacheRepository(
     /// <inheritdoc/>
     public async Task<T> AutoCacheAsync<T>(string keyPart, string?[] values, Func<Task<T>> getValue)
     {
-        if (getValue == null) throw new ArgumentNullException(nameof(getValue));
+        if (getValue is null) throw new ArgumentNullException(nameof(getValue));
 
         var valueFromCash = await this.GetAsync<T>(keyPart, values).ConfigureAwait(false);
-        if (valueFromCash != null)
+        if (valueFromCash is not null)
             return valueFromCash;
 
         var value = await getValue().ConfigureAwait(false);
-        if (value == null)
+        if (value is null)
             return value;
 
         return await this.SetAsync(keyPart, values, value).ConfigureAwait(false);
@@ -39,13 +39,13 @@ public class CacheRepository(
         var cacheKey = this.GetKey(keyPart, values);
 
         var cachedJson = await cache.GetStringAsync(cacheKey).ConfigureAwait(false);
-        if (cachedJson != null)
+        if (cachedJson is not null)
         {
             // объект может поменяться и не будет десериализован
             try
             {
                 var cachedObject = JsonSerializer.Deserialize<T>(cachedJson);
-                if (cachedObject != null)
+                if (cachedObject is not null)
                     return cachedObject;
             }
             catch

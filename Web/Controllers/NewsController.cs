@@ -18,7 +18,7 @@ public sealed class NewsController(
     public async Task<ActionResult<NewsArticleDto>> GetArticle(int id, CancellationToken cancellationToken = default)
     {
         var result = await newsRepository.GetArticleAsync(id, cancellationToken).ConfigureAwait(false);
-        if (result == null) return this.NotFound("статья не найдена");
+        if (result is null) return this.NotFound("статья не найдена");
 
         return result;
     }
@@ -50,7 +50,7 @@ public sealed class NewsController(
         CancellationToken cancellationToken = default)
     {
         var userInfo = this.GetUserInfo();
-        if (userInfo == null) return this.BadRequest("не удалось получить данные о пользователе");
+        if (userInfo is null) return this.BadRequest("не удалось получить данные о пользователе");
 
         var result = await newsRepository.CreateArticleAsync(
             new NewsArticleCreateDto
@@ -74,7 +74,7 @@ public sealed class NewsController(
         CancellationToken cancellationToken = default)
     {
         var userInfo = this.GetUserInfo();
-        if (userInfo == null) return this.BadRequest("не удалось получить данные о пользователе");
+        if (userInfo is null) return this.BadRequest("не удалось получить данные о пользователе");
 
         var result = await newsRepository.UpdateArticleAsync(
             new NewsArticleUpdateDto
@@ -88,7 +88,7 @@ public sealed class NewsController(
                 UserName = userInfo.name,
             }, cancellationToken).ConfigureAwait(false);
 
-        if (result == null) return this.NotFound("статья не найдена");
+        if (result is null) return this.NotFound("статья не найдена");
 
         await cacheRepository.Clear(CacheKeys.Articles).ConfigureAwait(false);
         return result;

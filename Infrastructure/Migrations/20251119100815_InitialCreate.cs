@@ -101,7 +101,7 @@ namespace Infrastructure.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            if (migrationBuilder == null) return;
+            if (migrationBuilder is null) return;
 
             migrationBuilder.DropTable(
                 name: "news_article_tag");

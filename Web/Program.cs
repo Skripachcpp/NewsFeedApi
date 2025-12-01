@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // bd _
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (connectionString == null) throw new ConstraintException("Отсутствует connection string: DefaultConnectio");
+if (connectionString is null) throw new ConstraintException("Отсутствует connection string: DefaultConnectio");
 
 builder.Services.AddDbContext<EfContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<DpContext>(_ => new DpContext(connectionString));
@@ -38,7 +38,7 @@ builder.Services.AddConfiguration();
 
 // redis _
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
-if (redisConnectionString == null) throw new InvalidConfigurationException("Отсутствует connection string для redis: Redis");
+if (redisConnectionString is null) throw new InvalidConfigurationException("Отсутствует connection string для redis: Redis");
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp => ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddSingleton<Lazy<IConnectionMultiplexer>>(sp =>
@@ -55,7 +55,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-if (jwtSettings == null) throw new InvalidOperationException("Не секретного ключа для jwt: JwtSettings");
+if (jwtSettings is null) throw new InvalidOperationException("Не секретного ключа для jwt: JwtSettings");
 
 builder.Services.AddAuthentication(options =>
 {

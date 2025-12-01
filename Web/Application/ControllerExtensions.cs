@@ -17,7 +17,7 @@ public abstract class BaseController : ControllerBase
         var userIdExist = int.TryParse(this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId);
         var userName = this.User.FindFirst(ClaimTypes.Name)?.Value;
 
-        if (!userIdExist || userName == null)
+        if (!userIdExist || userName is null)
             return null;
 
         var userInfo = new UserInfo(userId, userName);

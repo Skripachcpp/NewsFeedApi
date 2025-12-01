@@ -12,7 +12,7 @@ public class EfContext(DbContextOptions<EfContext> options): DbContext(options)
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        if (modelBuilder == null) throw new ArgumentNullException(nameof(modelBuilder));
+        if (modelBuilder is null) throw new ArgumentNullException(nameof(modelBuilder));
 
         modelBuilder.Entity<NewsArticle>(entity =>
         {

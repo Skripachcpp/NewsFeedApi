@@ -10,7 +10,7 @@ public class DpContext(string connectionString)
 {
     public IDbConnection OpenConnection()
     {
-        if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
+        if (connectionString is null) throw new ArgumentNullException(nameof(connectionString));
 
         var connection = new NpgsqlConnection(connectionString);
         connection.Open();
@@ -30,7 +30,7 @@ public class DpContext(string connectionString)
 
         var parametersExpando = new ExpandoObject();
         var dict = parametersExpando as IDictionary<string, object?>;
-        if (parameters != null)
+        if (parameters is not null)
         {
             foreach (var prop in parameters.GetType().GetProperties())
             {
@@ -44,7 +44,7 @@ public class DpContext(string connectionString)
         var multiple = await connection.QueryMultipleAsync(new CommandDefinition(
             @$"
         {sql}
-        {(sqt == null ? string.Empty : "LIMIT @Count OFFSET @Offset;")}
+        {(sqt is null ? string.Empty : "LIMIT @Count OFFSET @Offset;")}
         {sqt}
       ",
             parameters: parametersExpando,

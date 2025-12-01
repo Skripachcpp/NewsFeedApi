@@ -10,6 +10,7 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP FUNCTION IF EXISTS get_articles_paged(INTEGER, INTEGER);");
             migrationBuilder.Sql(@"
 CREATE OR REPLACE FUNCTION get_articles_paged(
     p_offset INTEGER DEFAULT 0,

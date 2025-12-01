@@ -18,10 +18,10 @@ internal sealed class Validate(): ValidationAttribute
     /// <inheritdoc/>
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (this.Required && value == null)
+        if (this.Required && value is null)
             return new ValidationResult("обязательно");
 
-        if (value == null)
+        if (value is null)
             return ValidationResult.Success;
 
         if (value is string text)

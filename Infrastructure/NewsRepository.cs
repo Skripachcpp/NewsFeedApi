@@ -95,7 +95,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         NewsArticleCreateDto article,
         CancellationToken cancellationToken = default)
     {
-        if (article == null) throw new ArgumentNullException(nameof(article));
+        if (article is null) throw new ArgumentNullException(nameof(article));
 
         using var connection = dpContext.OpenConnection();
         using var transaction = connection.BeginTransaction();
@@ -129,7 +129,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
                 transaction: transaction).ConfigureAwait(false);
 
             var articleNext = await this.QueryGetArticleAsync(articleId, connection, cancellationToken, transaction).ConfigureAwait(false);
-            if (articleNext == null)
+            if (articleNext is null)
             {
                 throw new InvalidOperationException("Не удалось загрузить созданную статью");
             }
@@ -150,7 +150,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
         NewsArticleUpdateDto article,
         CancellationToken cancellationToken = default)
     {
-        if (article == null) throw new ArgumentNullException(nameof(article));
+        if (article is null) throw new ArgumentNullException(nameof(article));
 
         using var connection = dpContext.OpenConnection();
         using var transaction = connection.BeginTransaction();
@@ -185,7 +185,7 @@ public class NewsRepository(DpContext dpContext): INewsRepository
                 transaction: transaction,
                 cancellationToken: cancellationToken)).ConfigureAwait(false);
 
-            if (articleId == null)
+            if (articleId is null)
             {
                 return null;
             }
@@ -198,10 +198,8 @@ public class NewsRepository(DpContext dpContext): INewsRepository
                 transaction: transaction).ConfigureAwait(false);
 
             var articleNext = await this.QueryGetArticleAsync(articleId.Value, connection, cancellationToken, transaction).ConfigureAwait(false);
-            if (articleNext == null)
-            {
+            if (articleNext is null)
                 throw new InvalidOperationException("Не удалось найти обновленную статью");
-            }
 
             transaction.Commit();
 
